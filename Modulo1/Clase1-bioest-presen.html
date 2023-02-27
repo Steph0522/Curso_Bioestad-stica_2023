@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bioestadística en R - parte práctica clase 1, Módulo 1 : Análisis de la diversidad</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Dra. Stephanie Hereira Pacheco" />
+    <script src="Clase1-bioest-presen_files/header-attrs-2.18/header-attrs.js"></script>
+    <script src="Clase1-bioest-presen_files/clipboard-2.0.6/clipboard.min.js"></script>
+    <link href="Clase1-bioest-presen_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="Clase1-bioest-presen_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="Clase1-bioest-presen_files/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+    <link href="Clase1-bioest-presen_files/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Bioestadística en R - parte práctica clase 1, Módulo 1 : Análisis de la diversidad
+]
+.author[
+### Dra. Stephanie Hereira Pacheco
+]
+.institute[
+### CTCB, UATx
+]
+.date[
+### 06-03-2023
+]
+
+---
+
+
+
+
+
+
+
+.pull-left[
+![](https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/1617710_1048843451811700_2278987052727773097_o-1920x805.jpg)
+&lt;img src="https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/uatx-logo.png" width="200px" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="https://pcb.ctbcuatx.edu.mx/wp-content/uploads/2020/07/PCBuwide-1024x426.jpg" width="500px" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://pbs.twimg.com/profile_images/1059608114805141504/SWOqgSmO_400x400.jpg" width="300px" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle
+
+# Análisis de diversidad
+
+## Contenido
+.pull-left[
+&gt; Parte 1
+&gt; <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M128 96h384v256h64V80C576 53.63 554.4 32 528 32h-416C85.63 32 64 53.63 64 80V352h64V96zM624 384h-608C7.25 384 0 391.3 0 400V416c0 35.25 28.75 64 64 64h512c35.25 0 64-28.75 64-64v-16C640 391.3 632.8 384 624 384zM365.9 286.2C369.8 290.1 374.9 292 380 292s10.23-1.938 14.14-5.844l48-48c7.812-7.813 7.812-20.5 0-28.31l-48-48c-7.812-7.813-20.47-7.813-28.28 0c-7.812 7.813-7.812 20.5 0 28.31l33.86 33.84l-33.86 33.84C358 265.7 358 278.4 365.9 286.2zM274.1 161.9c-7.812-7.813-20.47-7.813-28.28 0l-48 48c-7.812 7.813-7.812 20.5 0 28.31l48 48C249.8 290.1 254.9 292 260 292s10.23-1.938 14.14-5.844c7.812-7.813 7.812-20.5 0-28.31L240.3 224l33.86-33.84C281.1 182.4 281.1 169.7 274.1 161.9z"/></svg> `hillR`
+&gt; <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M128 96h384v256h64V80C576 53.63 554.4 32 528 32h-416C85.63 32 64 53.63 64 80V352h64V96zM624 384h-608C7.25 384 0 391.3 0 400V416c0 35.25 28.75 64 64 64h512c35.25 0 64-28.75 64-64v-16C640 391.3 632.8 384 624 384zM365.9 286.2C369.8 290.1 374.9 292 380 292s10.23-1.938 14.14-5.844l48-48c7.812-7.813 7.812-20.5 0-28.31l-48-48c-7.812-7.813-20.47-7.813-28.28 0c-7.812 7.813-7.812 20.5 0 28.31l33.86 33.84l-33.86 33.84C358 265.7 358 278.4 365.9 286.2zM274.1 161.9c-7.812-7.813-20.47-7.813-28.28 0l-48 48c-7.812 7.813-7.812 20.5 0 28.31l48 48C249.8 290.1 254.9 292 260 292s10.23-1.938 14.14-5.844c7.812-7.813 7.812-20.5 0-28.31L240.3 224l33.86-33.84C281.1 182.4 281.1 169.7 274.1 161.9z"/></svg>  `betapart`
+&gt; <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M128 96h384v256h64V80C576 53.63 554.4 32 528 32h-416C85.63 32 64 53.63 64 80V352h64V96zM624 384h-608C7.25 384 0 391.3 0 400V416c0 35.25 28.75 64 64 64h512c35.25 0 64-28.75 64-64v-16C640 391.3 632.8 384 624 384zM365.9 286.2C369.8 290.1 374.9 292 380 292s10.23-1.938 14.14-5.844l48-48c7.812-7.813 7.812-20.5 0-28.31l-48-48c-7.812-7.813-20.47-7.813-28.28 0c-7.812 7.813-7.812 20.5 0 28.31l33.86 33.84l-33.86 33.84C358 265.7 358 278.4 365.9 286.2zM274.1 161.9c-7.812-7.813-20.47-7.813-28.28 0l-48 48c-7.812 7.813-7.812 20.5 0 28.31l48 48C249.8 290.1 254.9 292 260 292s10.23-1.938 14.14-5.844c7.812-7.813 7.812-20.5 0-28.31L240.3 224l33.86-33.84C281.1 182.4 281.1 169.7 274.1 161.9z"/></svg>  `vegan`
+
+&gt; Parte 2
+&gt; <svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M128 96h384v256h64V80C576 53.63 554.4 32 528 32h-416C85.63 32 64 53.63 64 80V352h64V96zM624 384h-608C7.25 384 0 391.3 0 400V416c0 35.25 28.75 64 64 64h512c35.25 0 64-28.75 64-64v-16C640 391.3 632.8 384 624 384zM365.9 286.2C369.8 290.1 374.9 292 380 292s10.23-1.938 14.14-5.844l48-48c7.812-7.813 7.812-20.5 0-28.31l-48-48c-7.812-7.813-20.47-7.813-28.28 0c-7.812 7.813-7.812 20.5 0 28.31l33.86 33.84l-33.86 33.84C358 265.7 358 278.4 365.9 286.2zM274.1 161.9c-7.812-7.813-20.47-7.813-28.28 0l-48 48c-7.812 7.813-7.812 20.5 0 28.31l48 48C249.8 290.1 254.9 292 260 292s10.23-1.938 14.14-5.844c7.812-7.813 7.812-20.5 0-28.31L240.3 224l33.86-33.84C281.1 182.4 281.1 169.7 274.1 161.9z"/></svg>  `iNext`
+
+]
+
+.pull-right[
+&lt;img src="https://bookdown.org/chescosalgado/intro_r/img/RStudiologo.png" width="400px" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://bookdown.org/chescosalgado/intro_r/img/Rlogo.png" width="200px" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+class: middle, inverse, center
+
+# Parte 1
+
+---
+
+## `hillR`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/daijiang/hillR)
+
+El paquete `hillR` contiene funciones para calcular la diversidad taxonómica, funcional y filogenética en el marco de los números de Hill.
+Los métodos están basados en la referencia de [**Chao, Chiu, &amp; Jost, (2014)**](https://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-120213-091540) que ya hemos tratado en la parte teórica.
+
+Para instalar este paquete usamos el comando:
+
+
+```r
+install.packages("hillR")
+# o instala la versión en desarrollo del github
+devtools::install_github("daijiang/hillR")
+```
+
+También instalaremos el paquete `FD` de dónde usaremos la data ejemplo:
+
+
+```r
+install.packages("FD")
+```
+---
+## `hillR`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/daijiang/hillR)
+
+Usaremos la data **dummy** de ejemplo que viene en el paquete **`FD`** para utilizar las funciones de `hillR`.
+
+
+```r
+set.seed(123)
+library(FD)
+dummy_data &lt;- dummy
+comunidades&lt;-  dummy_data$abun
+funciones &lt;- dummy_data$trait
+arbol &lt;- ape::rtree(n = ncol(comunidades), tip.label = paste0("sp", 1:ncol(comunidades)))
+```
+
+En este caso, Lo primero es usar la función **'set.seed'** o sembrar semilla, para indicarle a R que nos guarde los cálculos en esta semilla y cada vez que lo corramos den el mismo valor (eso es cuando son muestreos aleatorios como es el caso de la función *rtree* del paquete 'ape'. 
+---
+## `hillR`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/daijiang/hillR)
+
+Exploremos los tipos de datos que tenemos:
+
+
+```r
+class(comunidades)
+```
+
+```
+## [1] "matrix" "array"
+```
+
+```r
+class(funciones)
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+class(arbol)
+```
+
+```
+## [1] "phylo"
+```
+---
+## `hillR`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/daijiang/hillR)
+
+Definimos nuestras datas a usar:
+
+-   comunidades: tabla con counts o recuentos de especies (columnas) por sitio o muestra (filas).
+
+-   funciones : tabla con funciones y resultados (numéricos o categóricos) por especie descrita en nuestra tabla de comunidades.
+    Especies como filas y funciones como columnas.
+
+-   arbol: objeto tipo "phylo" tipo lista con vértices y nodos describiendo relaciones filogenéticas.
+
+---
+
+.pull-left[
+
+```r
+head(comunidades)
+```
+
+```
+##      sp1 sp2 sp3 sp4 sp5 sp6 sp7 sp8
+## com1   1   1   0   0   4   2   0   0
+## com2   0   0   0   2   1   0   0   5
+## com3   2   0   0   0   0   1   0   3
+## com4   1   0   7   0   0   0   0   0
+## com5   0   0   2   3   3   0   0   0
+## com6   0   3   0   0   5   6   1   6
+```
+
+
+```r
+head(funciones)
+```
+
+```
+##     num1 num2 fac1 fac2 ord1 ord2 bin1 bin2
+## sp1  9.0  4.5    A    X    3    2    0    1
+## sp2  8.1  6.0    A    Z &lt;NA&gt;    1    0    1
+## sp3   NA  2.3    C    Y    5    3    1    1
+## sp4  3.2  5.4    B    Z    1    7    0    0
+## sp5  5.8  1.2    C    X    2    6   NA    0
+## sp6  3.4  8.5    C    Y    2    1    1    1
+```
+]
+ .pull-right[
+
+
+```r
+ head(arbol)
+```
+
+```
+## $edge
+##       [,1] [,2]
+##  [1,]    9   10
+##  [2,]   10   11
+##  [3,]   11   12
+##  [4,]   12    1
+##  [5,]   12    2
+##  [6,]   11    3
+##  [7,]   10   13
+##  [8,]   13   14
+##  [9,]   14   15
+## [10,]   15    4
+## [11,]   15    5
+## [12,]   14    6
+## [13,]   13    7
+## [14,]    9    8
+## 
+## $tip.label
+## [1] "sp2" "sp6" "sp3" "sp5" "sp4" "sp8" "sp7" "sp1"
+## 
+## $Nnode
+## [1] 7
+## 
+## $edge.length
+##  [1] 0.10292468 0.89982497 0.24608773 0.04205953 0.32792072 0.95450365
+##  [7] 0.88953932 0.69280341 0.64050681 0.99426978 0.65570580 0.70853047
+## [13] 0.54406602 0.59414202
+```
+]
+---
+
+### Cálculo de la diversidad taxonómica, funcional y filogenética de cada sitio o muestra (alfa diversidad).
+
+.pull-left[
+Primero cargamos la librería `hillR` previamente instalada:
+
+
+```r
+library(hillR)
+```
+
+Luego calculamos la diversidad taxonómica: 
+
+
+```r
+hill_taxa(comunidades, q = 0)
+```
+]
+
+.pull-right[
+De igual forma la diversidad funcional:
+
+
+```r
+hill_func(comunidades, funciones, q = 0)
+```
+
+Y por último la diversidad filogenética:
+
+
+```r
+hill_phylo(comunidades, arbol, q = 0) 
+```
+]
+
+
+---
+Los resultados que nos da cada función son:
+.pull-left[
+1.  **hill_taxa()** nos da un vector con el va valor de diversidad alfa para cada sitio o muestra, *q* = 0 (por defecto) riqueza de especies , *q* = 1 para obtener shannon (especies frecuentes) y *q* = 2  el inverso de simpson (especies dominantes).
+2. **hill_func()**[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-120213-091540)   nos dará una matrix con la información de:
+-   Q : Q de Rao
+-   D_q : el numero efectivo de epecies distintas igualmente abundantes y funcionales
+]
+
+.pull-right[
+
+-   MD_q : diversidad funcional media por especie, la suma efectiva de las distancias por pares entre una especie fija y todas las demás especies
+-   FD_q : diversidad funcional total, la distancia funcional total efectiva entre especies del conjunto
+3.  **hill_phylo** nos dará un vector de diversidad filogenética basada en el número de Hill ('PD(T)', longitud total efectiva de la rama) para todos los sitios.
+]
+---
+
+### Cálculo de la diversidad taxonómica, funcional y filogenética de a través de diferentes sitios o muestras.
+
+&lt;uw-blockquote&gt;Este script calcula la diversidad **gamma**, **alfa**, y **beta** a traves de todas las comunidades o muestras asi como su similitud.&lt;/uw-blockquote&gt;
+
+
+Si comm\&gt;2 la diversidad gamma es la diversidad juntada (pooled) del ensamble, la alfa es el promedio de la diversidad a través de todos los sitios y la beta es a través de todas las comunidades.
+
+También nos da la medida de homogeneidad de MacArthur, la similtud local (traslape de especies / overlap similar al de Sorensen) y la similitud regional (traslape de especies  overlap similar al de Jaccard).
+
+---
+
+- Para las comunidades:
+
+
+```r
+hill_taxa_parti(comunidades, q = 0)
+```
+
+```
+##   q TD_gamma TD_alpha  TD_beta M_homog local_similarity region_similarity
+## 1 0        8      3.6 2.222222    0.45        0.8641975         0.3888889
+```
+
+- Para las funciones:
+
+
+```r
+hill_func_parti(comunidades, funciones, q = 0)
+```
+
+```
+##   q raoQ_gamma FD_gamma FD_alpha FD_beta local_similarity region_similarity
+## 1 0  0.4529152 29.66099 14.15941 2.09479        0.9889415         0.4720957
+```
+---
+
+- Para las filogenias:
+
+
+```r
+hill_phylo_parti(comunidades, arbol, q = 0)
+```
+
+```
+##   q PD_gamma PD_alpha  PD_beta local_similarity region_similarity
+## 1 0 8.292885 5.119871 1.619745        0.9311395          0.574868
+```
+
+
+---
+### Cálculo de la diversidad pareada taxonómica, funcional y filogenética
+
+&lt;uw-blockquote&gt;Calcula la diversidad pareada gamma, alfa y beta para las comunidades así como la similitud&lt;/uw-blockquote&gt;
+
+La diversidad pareada hace el cáclulo entre pares de sitios o muestreasw generando ya sea un data.frame o una matriz de distancia que puede ser usada para futuros análisis multivareado.
+En este ejemplo y por defecto obtendremos el data.frame para la diversidad taxonómica. Y al final haremos un ejemplo de cómo se vería una matriz. 
+---
+- Para las comunidades:
+
+```r
+head(hill_taxa_parti_pairwise(comunidades, q = 0, .progress = FALSE), n = 3)
+```
+
+```
+## # A tibble: 3 × 8
+##       q site1 site2 TD_gamma TD_alpha TD_beta local_similarity region_similarity
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt;             &lt;dbl&gt;
+## 1     0 com1  com2         6      3.5    1.71            0.286             0.167
+## 2     0 com1  com3         5      3.5    1.43            0.571             0.4  
+## 3     0 com2  com3         5      3      1.67            0.333             0.2
+```
+
+- Para las funciones:
+
+```r
+head(hill_func_parti_pairwise(comunidades, funciones, q = 0, show_warning = FALSE, .progress =FALSE), n = 3)
+```
+
+```
+## # A tibble: 3 × 8
+##       q site1 site2 FD_gamma FD_alpha FD_beta local_similarity region_similarity
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt;             &lt;dbl&gt;
+## 1     0 com1  com2      15.9    10.3     1.54            0.821             0.534
+## 2     0 com1  com3      10.7     7.96    1.35            0.883             0.655
+## 3     0 com2  com3      11.1     7.03    1.58            0.807             0.511
+```
+---
+
+- Para las filogenias
+
+
+```r
+head(hill_phylo_parti_pairwise(comunidades, arbol, q = 0, show_warning = FALSE, .progress = FALSE) )
+```
+
+```
+## # A tibble: 6 × 8
+##       q site1 site2 PD_gamma PD_alpha PD_beta local_similarity region_similarity
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;            &lt;dbl&gt;             &lt;dbl&gt;
+## 1     0 com1  com2      6.79     5.06    1.34           0.657             0.489 
+## 2     0 com1  com3      6.14     4.95    1.24           0.759             0.611 
+## 3     0 com2  com3      6.75     4.57    1.48           0.523             0.355 
+## 4     0 com1  com4      6.38     3.99    1.60           0.400             0.250 
+## 5     0 com2  com4      7.13     3.62    1.97           0.0284            0.0144
+## 6     0 com3  com4      5.42     3.51    1.54           0.455             0.295
+```
+---
+
+Veamos el ejemplo de cuando queremos obtener las matrices de distancia al orden 0:
+
+
+```r
+beta_q0_mat&lt;-hill_taxa_parti_pairwise(
+  comunidades, q = 0, .progress = FALSE,
+  output = "matrix", pairs = "full")
+```
+
+.pull-left[
+Esta vez en vez de un data.frame nos dará una lista que contendrá 6 elementos, definidos así:
+
+*q =* el orden al cual fue realizado el cálculo
+
+TD_gamma= gamma pareada
+
+TD_alpha=alfa pareada]
+.pull-right[
+Td_beta: dependiendo del orden *q* (*q*=0 Jaccard/Sorensen, *q*=1 Horn y *q*=2 Morisita-Horn).
+
+local_similarity : traslape de especies similar a Sorensen (q=0)
+
+region_similarity: traslape de especies similar a Jaccard (q=0)
+]
+---
+# Ejemplo aplicado
+
+Tomemos la data 'spiders' del paquete iNEXT que veremos más adelante.
+Para más información de estos puedes consultar las referencia [<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/ES11-00155.1)[<svg aria-hidden="true" role="img" viewBox="0 0 448 512" style="height:1em;width:0.88em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M364.2 83.8C339.8 59.39 300.2 59.39 275.8 83.8L91.8 267.8C49.71 309.9 49.71 378.1 91.8 420.2C133.9 462.3 202.1 462.3 244.2 420.2L396.2 268.2C407.1 257.3 424.9 257.3 435.8 268.2C446.7 279.1 446.7 296.9 435.8 307.8L283.8 459.8C219.8 523.8 116.2 523.8 52.2 459.8C-11.75 395.8-11.75 292.2 52.2 228.2L236.2 44.2C282.5-2.08 357.5-2.08 403.8 44.2C450.1 90.48 450.1 165.5 403.8 211.8L227.8 387.8C199.2 416.4 152.8 416.4 124.2 387.8C95.59 359.2 95.59 312.8 124.2 284.2L268.2 140.2C279.1 129.3 296.9 129.3 307.8 140.2C318.7 151.1 318.7 168.9 307.8 179.8L163.8 323.8C157.1 330.5 157.1 341.5 163.8 348.2C170.5 354.9 181.5 354.9 188.2 348.2L364.2 172.2C388.6 147.8 388.6 108.2 364.2 83.8V83.8z"/></svg>](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2010.00025.x)
+
+
+```r
+library(iNEXT)
+data("spider")
+```
+
+¿Cuál de los dos tratamientos da valores más altos de riqueza?
+---
+
+
+## `betapart`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+- El paquete `betapart` fue desarrollado por el mismo autor que introduce los conceptos de partición de la diversidad beta en los componentes de recambio (turnover) y anidamiento (nestedness).
+
+- Para instalarlo ponemos la siguiente línea de código:
+
+
+```r
+install.packages("betapart")
+```
+
+Primero llamamos al paquete previamente instalado.
+Luego definiremos el conjunto de datos de ejemplo, y diremos que las tres primeras columnas pertenecen a un bosque no perturbado y las tres siguientes a un bosque no perturbado.
+
+---
+
+
+```r
+library(betapart)
+comm&lt;- data.frame(comm =1:6,
+                         sp1=c(2,2,3,0,0,1),
+                         sp2=c(2,2,0,1,1,2),
+                         sp3=c(1,0,1,2,3,2),
+                         sp4=c(1,0,1,0,2,0),
+                         sp5=c(1,2,0,0,0,1),
+                         sp6=c(2,2,1,0,0,0),
+                         sp7=c(0,0,0,1,0,1),
+                         sp8=c(1,0,1,0,1,0), row.names = 1)
+
+
+groups &lt;- factor(c(rep(1,3), rep(2,3)), 
+                 labels = c("noperturbado","perturbado"))
+head(comm);groups
+```
+
+```
+##   sp1 sp2 sp3 sp4 sp5 sp6 sp7 sp8
+## 1   2   2   1   1   1   2   0   1
+## 2   2   2   0   0   2   2   0   0
+## 3   3   0   1   1   0   1   0   1
+## 4   0   1   2   0   0   0   1   0
+## 5   0   1   3   2   0   0   0   1
+## 6   1   2   2   0   1   0   1   0
+```
+
+```
+## [1] noperturbado noperturbado noperturbado perturbado   perturbado  
+## [6] perturbado  
+## Levels: noperturbado perturbado
+```
+---
+## `betapart`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+Los índices Jaccard y Sorensen en los que está basado este paquete no consideran la abundancia de especies (*q*=0), así que convertiremos nuestra data a tipo incidencia (presencia/ausencia):
+
+
+```r
+ presabs&lt;-ifelse(comm&gt;0,1,0)
+```
+
+Ahora, calcularemos el índice de Sorensen y sus particiones de recambio y anidamiento.
+En su lugar, podemos calcular el índice de Jaccard usando el argumento index.family="jaccard".
+
+
+```r
+ dist_comp&lt;-beta.pair(presabs, index.family="sorensen")
+```
+
+---
+Vemos que el resultado es una lista de tres matrices:
+
+
+```r
+head(dist_comp)
+```
+
+```
+## $beta.sim
+##           1         2         3         4         5
+## 2 0.0000000                                        
+## 3 0.0000000 0.5000000                              
+## 4 0.3333333 0.6666667 0.6666667                    
+## 5 0.0000000 0.7500000 0.2500000 0.3333333          
+## 6 0.2000000 0.2500000 0.6000000 0.0000000 0.5000000
+## 
+## $beta.sne
+##            1          2          3          4          5
+## 2 0.27272727                                            
+## 3 0.16666667 0.05555556                                 
+## 4 0.26666667 0.04761905 0.08333333                      
+## 5 0.27272727 0.00000000 0.08333333 0.09523810           
+## 6 0.13333333 0.08333333 0.00000000 0.25000000 0.05555556
+## 
+## $beta.sor
+##           1         2         3         4         5
+## 2 0.2727273                                        
+## 3 0.1666667 0.5555556                              
+## 4 0.6000000 0.7142857 0.7500000                    
+## 5 0.2727273 0.7500000 0.3333333 0.4285714          
+## 6 0.3333333 0.3333333 0.6000000 0.2500000 0.5555556
+```
+---
+## `betapart`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+&lt;uw-blockquote&gt;Para obtener o extraer la partición del índice de recambio de Sorensen por pares entre comunidades, escriba: dist_comp\$beta.sim&lt;/uw-blockquote&gt;
+&lt;uw-blockquote&gt;Para obtener la partición de anidamiento:  dist_comp\$beta.sne&lt;/uw-blockquote&gt; 
+&lt;uw-blockquote&gt;Para obtener toda la diversidad beta: dist_comp\$beta.sor&lt;/uw-blockquote&gt;
+---
+## `betapart`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+Ya obtenidas las diversas matrices podemos aplicar cualquier tipo de análisis multivariado deseado.
+
+En el presente ejemplo, si queremos comparar las diversidades beta de las comunidades agregadas por los tratamientos de "no perturbado" y "perturbado", podemos utilizar el análisis "betadisper" del paquete 'vegan':
+
+
+```r
+library(vegan)
+bd&lt;-betadisper(dist_comp$beta.sor,groups)
+bd.sim&lt;-betadisper(dist_comp$beta.sim,groups)
+bd.sne&lt;-betadisper(dist_comp$beta.sne,groups)
+```
+
+
+```r
+plot(bd);plot(bd.sim);plot(bd.sne)
+```
+
+---
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/figures-side-1.png" width="33%" /&gt;&lt;img src="Clase1-bioest-presen_files/figure-html/figures-side-2.png" width="33%" /&gt;&lt;img src="Clase1-bioest-presen_files/figure-html/figures-side-3.png" width="33%" /&gt;
+
+El gráfico de dispersión beta indica que hay una diferencia en la composición de especies de los fragmentos de bosque perturbado y no perturbado explicado de mejor manera por el recambio.
+
+---
+## `betapart`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+Si queremos obtener estos mismos resultados pero para todos los sitios, entonces usamos la función **beta.multi()**:
+
+
+```r
+dist.multi&lt;-beta.multi(presabs,index.family ="sorensen" )
+head(dist.multi)
+```
+
+```
+## $beta.SIM
+## [1] 0.4871795
+## 
+## $beta.SNE
+## [1] 0.1206637
+## 
+## $beta.SOR
+## [1] 0.6078431
+```
+---
+class: center, middle
+
+# Ejemplo aplicado
+
+Con la misma data trabajada anteriormente vamos a verificar si dan resultados similares utilizando el índice de Jaccard.
+
+---
+
+## `vegan`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/vegandevs/vegan)
+
+Esta paquetería es una excelente herramienta para analizar datos ecológicos.
+En el caso de alfa diversidad se pueden calcular los índices tradicionales (que no están en el marco de los números de Hill).
+
+Aquí realizaremos un ejemplo con una data que trae de ejemplo que se llama BCI (Barro Colorado Island Tree Counts).
+
+Primero llamamos la data:
+
+
+```r
+data(BCI, BCI.env)
+```
+
+---
+
+Podemos calcular los índices de diversidad alfa, como Shannon, Simpson, el inverso de Simpson, Fisher, Especies observadas, beta y gamma: 
+
+```r
+shannon &lt;- diversity(BCI)
+simpson &lt;- diversity(BCI, "simpson")
+inverso_simp &lt;- diversity(BCI, "inv")
+fisher &lt;- fisher.alpha(BCI)
+especies_num &lt;- specnumber(BCI) 
+alfa &lt;- with(BCI.env, tapply(specnumber(BCI), Habitat, mean))
+gamma &lt;- with(BCI.env, specnumber(BCI, Habitat))
+gamma/alfa - 1
+```
+
+```
+##   OldHigh    OldLow  OldSlope     Swamp     Young 
+## 0.8425656 1.2883487 0.9981802 0.3617021 0.3000000
+```
+
+```r
+alfa &lt;- with(BCI.env, tapply(diversity(BCI), Habitat, mean)) # promedio
+gamma &lt;- with(BCI.env, diversity(BCI, groups=Habitat)) # junta
+gamma-alfa
+```
+
+```
+##   OldHigh    OldLow  OldSlope     Swamp     Young 
+## 0.2345878 0.4085595 0.3249760 0.1605548 0.1408068
+```
+---
+
+Para la beta divesidad podemos calcular nuestras matrices de distancia con la función 'vegdist':
+
+
+```r
+library(tidyverse)
+distancias&lt;- vegdist(BCI, method = "jaccard")
+distancias %&gt;% as.matrix() %&gt;% as.data.frame() %&gt;% dplyr::select(1:4) %&gt;% dplyr::slice(1:4)
+```
+
+```
+##           1         2         3         4
+## 1 0.0000000 0.4260250 0.5186992 0.5382263
+## 2 0.4260250 0.0000000 0.4463668 0.4790323
+## 3 0.5186992 0.4463668 0.0000000 0.4898911
+## 4 0.5382263 0.4790323 0.4898911 0.0000000
+```
+---
+class: middle, center, inverse
+
+# Parte 2
+
+---
+## `iNEXT`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+- Es un paquete disponible en R para rarefacción y extrapolación de la diversidad de especies en el marco de los números de Hill.
+
+- iNEXT se centra en tres medidas de los números de Hill de orden *q*: riqueza de especies (*q*=0), diversidad de Shannon (*q*=1, la exponencial de la entropía de Shannon) y diversidad de Simpson (*q*=2, la inversa de la concentración de Simpson).
+---
+## `iNEXT`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+Para cada medida iNEXT utiliza la muestra observada para calcular las estimaciones de diversidad para muestras rarificadas y extrapoladas y los intervalos de confianza del 95 %, además de representar gráficamente los dos tipos siguientes de las curvas de rarefacción y extrapolación (R/E):
+
+&lt;uw-blockquote&gt;**Curvas de muestreo R/E basadas en el tamaño de la muestra:** iNEXT calcula estimaciones de diversidad para muestras rarificadas y extrapoladas hasta el doble del tamaño de la muestra de referencia  o un tamaño especificado por el usuario. Este tipo de curva de muestreo traza las estimaciones de diversidad con respecto al tamaño de la muestra. &lt;/uw-blockquote&gt;
+---
+&lt;uw-blockquote&gt;**Curvas de muestreo R/E basadas en la cobertura:** iNEXT calcula estimaciones de diversidad para muestras enrarecidas y extrapoladas con integridad de la muestra (medida por la cobertura de la muestra) hasta el valor de cobertura del doble del tamaño de la muestra de referencia o una cobertura especificada por el usuario. Este tipo de curva de muestreo traza las estimaciones de diversidad con respecto a la cobertura de la muestra.&lt;/uw-blockquote&gt;
+
+Además de los dos tipos anteriores de curvas de muestreo, iNEXT también traza una **curva de completitud de la muestra**, que describe cómo varía la estimación de la cobertura de la muestra en función del tamaño de la muestra.
+La curva de integridad de la muestra se puede considerar como un puente que conecta los dos tipos de curvas mencionados anteriormente.
+---
+## `iNEXT`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+Para instalar este paquete:
+
+
+```r
+## instalando iNEXT del CRAN
+install.packages("iNEXT")
+```
+
+
+
+```r
+## instalando la versión de desarrollo
+install.packages('devtools')
+library(devtools)
+install_github('AnneChao/iNEXT')
+```
+
+
+```r
+## cargando el paquete
+library(iNEXT)
+library(ggplot2)
+```
+
+---
+## `iNEXT`[<svg aria-hidden="true" role="img" viewBox="0 0 640 512" style="height:1em;width:1.25em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:#5E2129;overflow:visible;position:relative;"><path d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"/></svg>](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+La función principal es:
+
+
+```r
+iNEXT(x, q=0, datatype="abundance", se=TRUE, conf=0.95, nboot=50)
+```
+
+
+Donde:
+
+-   x : es la data,
+
+-   datatype: puede ser "abundance" ó "incidence_raw", ó "incidence_freq",
+
+-   se: TRUE o FALSE si se quiere hacer un muestreo tipo 'bootsrap',
+
+-   conf: el intervalo de confianza,
+
+-   nboot: número de replicaciones de 'bootsrap'
+
+---
+iNEXT(x, q=0, datatype="abundance", se=TRUE, conf=0.95, nboot=50)
+
+
+Correremos el ejemplo con la data del paquete, vista anteriormente **spider**:
+
+
+```r
+data("spider")
+str(spider)
+```
+
+```
+## List of 2
+##  $ Girdled: num [1:26] 46 22 17 15 15 9 8 6 6 4 ...
+##  $ Logged : num [1:37] 88 22 16 15 13 10 8 8 7 7 ...
+```
+
+```r
+out &lt;- iNEXT(spider, q=c(0, 1, 2), datatype="abundance")
+```
+
+
+```r
+out
+```
+---
+Si vemos el output de iNEXT nos da una lista con tres elementos:
+
+&gt;- **\$DataInfo** que nos resume la información de la data
+
+&gt;-  **\$iNextEst** los estimados para las muestras rarificadas y extrapoladas (datos para las curvas)
+
+&gt; - **\$AsyEst** muestra la diversidad estimada&lt;/uw-blockquote&gt;
+
+
+---
+-   Podemos obtener ahora nuestras curvas por sitio o en este caso por tratamiento a los 3 órdenes:
+
+
+```r
+ggiNEXT(out, type=1, facet.var="site")
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-42-1.png" style="display: block; margin: auto;" /&gt;
+---
+
+-   También podemos obtener ahora nuestras curvas de cobertura:
+
+
+```r
+ggiNEXT(out, type=2)
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-43-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+-   Por último una gráfica de diversidad de especies vs cobertura para los tratamientos:
+
+
+```r
+ggiNEXT(out, type=3, facet.var="site")
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-44-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+-   Y a los diferentes órdenes:
+
+
+```r
+ggiNEXT(out, type=3, facet.var="order")
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-45-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+- Ahora si se quiere sólo los índices basandonos ya sea en abundancia o incidencia y en tamaño o cobertura, usamos la función **estimateD**, así:
+
+
+```r
+estimateD(spider$Logged, datatype="abundance", base="size",  conf=0.95)
+```
+
+```
+##     m   method order    SC     qD qD.LCL qD.UCL
+## 1 252 observed     0 0.945 37.000 31.322 42.678
+## 2 252 observed     1 0.945 14.421 11.757 17.085
+## 3 252 observed     2 0.945  6.761  5.041  8.482
+```
+
+
+```r
+estimateD(spider$Girdled, datatype="abundance", base="size",  conf=0.95)
+```
+
+```
+##     m   method order    SC    qD qD.LCL qD.UCL
+## 1 168 observed     0 0.929 26.00 20.338 31.662
+## 2 168 observed     1 0.929 12.06  9.927 14.192
+## 3 168 observed     2 0.929  7.84  6.110  9.570
+```
+
+---
+
+### Ejemplo aplicado
+
+
+Apliquemos lo visto usando como ejemplo pequeño con datos de incidencia (presencia/ausencia):
+
+
+```r
+data(ciliates)
+#str(ciliates)
+```
+
+---
+
+# Otras funciones
+
+Este paquete también cuenta con otras funciones de interés, tales como:
+
+-   ChaoEntropy() : Estimación de la entropía/diversidad de Shannon
+
+-   ChaoRichness(): Estimación de la riqueza de especies
+
+-   ChaoShannon(): Estimación de la entropía/diversidad de Shannon
+
+-   ChaoSimpson(): Estimación del índice de Gini-Simpson o diversidad de Simpson
+
+-   ChaoSpecies(): Estimación de la riqueza de especies
+
+-   EstSimpson: Estimación del índice de Gini-Simpson o diversidad de Simpson
+
+---
+
+# Un ejemplo
+
+
+```r
+ChaoRichness(spider)
+```
+
+```
+##         Observed Estimator Est_s.e. 95% Lower 95% Upper
+## Girdled       26    43.893   14.306    30.511    96.971
+## Logged        37    61.403   18.532    43.502   128.583
+```
+
+```r
+ChaoShannon(spider)
+```
+
+```
+##         Observed Estimator Est_s.e 95% Lower 95% Upper
+## Girdled    2.490     2.627   0.110     2.490     2.842
+## Logged     2.669     2.793   0.099     2.669     2.988
+```
+
+---
+## Curvas en vegan
+
+
+```r
+library(vegan)
+data("BCI")
+head(BCI)[1:4,1:4]
+```
+
+```
+##   Abarema.macradenia Vachellia.melanoceras Acalypha.diversifolia
+## 1                  0                     0                     0
+## 2                  0                     0                     0
+## 3                  0                     0                     0
+## 4                  0                     0                     0
+##   Acalypha.macrostachya
+## 1                     0
+## 2                     0
+## 3                     0
+## 4                     0
+```
+
+
+---
+## Curvas en vegan
+
+
+```r
+#por sitios
+sac &lt;- specaccum(BCI)
+plot(sac, ci.type="polygon") #ver vegan para opciones
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-51-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## Curvas en vegan
+
+
+```r
+#por individuos
+sac &lt;- specaccum(BCI, method = "rarefaction")
+plot(sac, xvar = "individual", ci.type="polygon") 
+```
+
+&lt;img src="Clase1-bioest-presen_files/figure-html/unnamed-chunk-52-1.png" style="display: block; margin: auto;" /&gt;
+
+
+|   
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

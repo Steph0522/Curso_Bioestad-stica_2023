@@ -1,0 +1,662 @@
+---
+title: "Bioestadística en R - parte práctica clase 1, Módulo 1 : Análisis de la diversidad"
+author: "Dra. Stephanie Hereira Pacheco"
+institute: "CTCB, UATx"
+date: "06-03-2023"
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    nature:
+      ratio: '16:9'
+---
+
+```{r xaringan-themer, include=FALSE, warning=FALSE, eval=FALSE}
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#5E2129",
+  code_highlight_color = "#E3906F", 
+  code_inline_color = "#0E2B54",
+    text_font_size = "1.4rem",
+
+)
+```
+
+```{r xaringanExtra-clipboard, echo=FALSE}
+htmltools::tagList(
+  xaringanExtra::use_clipboard(
+    button_text = "<i class=\"fa fa-clipboard\"></i>",
+    success_text = "<i class=\"fa fa-check\" style=\"color: #90BE6D\"></i>",
+  ),
+  rmarkdown::html_dependency_font_awesome()
+)
+```
+
+
+.pull-left[
+![](https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/1617710_1048843451811700_2278987052727773097_o-1920x805.jpg)
+```{r out.width="200px", echo=FALSE, fig.align='center'}
+
+knitr::include_graphics("https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/uatx-logo.png")
+
+```
+]
+
+.pull-right[
+```{r out.width="500px", echo=FALSE, fig.align='center'}
+
+knitr::include_graphics("https://pcb.ctbcuatx.edu.mx/wp-content/uploads/2020/07/PCBuwide-1024x426.jpg")
+
+```
+
+```{r out.width="300px", echo=FALSE, fig.align='center'}
+
+knitr::include_graphics("https://pbs.twimg.com/profile_images/1059608114805141504/SWOqgSmO_400x400.jpg")
+
+```
+]
+
+---
+class: middle
+
+# Análisis de diversidad
+
+## Contenido
+.pull-left[
+> Parte 1
+> `r fontawesome::fa("laptop-code", fill = "#5E2129")` `hillR`
+> `r fontawesome::fa("laptop-code", fill = "#5E2129")`  `betapart`
+> `r fontawesome::fa("laptop-code", fill = "#5E2129")`  `vegan`
+
+> Parte 2
+> `r fontawesome::fa("laptop-code", fill = "#5E2129")`  `iNext`
+
+]
+
+.pull-right[
+```{r out.width="400px", echo=FALSE, fig.align='center'}
+
+knitr::include_graphics("https://bookdown.org/chescosalgado/intro_r/img/RStudiologo.png")
+
+```
+
+```{r out.width="200px", echo=FALSE, fig.align='center'}
+
+knitr::include_graphics("https://bookdown.org/chescosalgado/intro_r/img/Rlogo.png")
+
+```
+
+
+]
+
+---
+class: middle, inverse, center
+
+# Parte 1
+
+---
+
+## `hillR`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/daijiang/hillR)
+
+El paquete `hillR` contiene funciones para calcular la diversidad taxonómica, funcional y filogenética en el marco de los números de Hill.
+Los métodos están basados en la referencia de [**Chao, Chiu, & Jost, (2014)**](https://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-120213-091540) que ya hemos tratado en la parte teórica.
+
+Para instalar este paquete usamos el comando:
+
+```{r, eval=FALSE}
+install.packages("hillR")
+# o instala la versión en desarrollo del github
+devtools::install_github("daijiang/hillR")
+```
+
+También instalaremos el paquete `FD` de dónde usaremos la data ejemplo:
+
+```{r, eval=FALSE}
+install.packages("FD")
+```
+---
+## `hillR`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/daijiang/hillR)
+
+Usaremos la data **dummy** de ejemplo que viene en el paquete **`FD`** para utilizar las funciones de `hillR`.
+
+```{r, warning=FALSE, message=FALSE}
+set.seed(123)
+library(FD)
+dummy_data <- dummy
+comunidades<-  dummy_data$abun
+funciones <- dummy_data$trait
+arbol <- ape::rtree(n = ncol(comunidades), tip.label = paste0("sp", 1:ncol(comunidades)))
+```
+
+En este caso, Lo primero es usar la función **'set.seed'** o sembrar semilla, para indicarle a R que nos guarde los cálculos en esta semilla y cada vez que lo corramos den el mismo valor (eso es cuando son muestreos aleatorios como es el caso de la función *rtree* del paquete 'ape'. 
+---
+## `hillR`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/daijiang/hillR)
+
+Exploremos los tipos de datos que tenemos:
+
+```{r}
+class(comunidades)
+class(funciones)
+class(arbol)
+```
+---
+## `hillR`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/daijiang/hillR)
+
+Definimos nuestras datas a usar:
+
+-   comunidades: tabla con counts o recuentos de especies (columnas) por sitio o muestra (filas).
+
+-   funciones : tabla con funciones y resultados (numéricos o categóricos) por especie descrita en nuestra tabla de comunidades.
+    Especies como filas y funciones como columnas.
+
+-   arbol: objeto tipo "phylo" tipo lista con vértices y nodos describiendo relaciones filogenéticas.
+
+---
+
+.pull-left[
+```{r}
+head(comunidades)
+```
+
+```{r}
+head(funciones)
+```
+]
+ .pull-right[
+
+```{r}
+ head(arbol)
+```
+]
+---
+
+### Cálculo de la diversidad taxonómica, funcional y filogenética de cada sitio o muestra (alfa diversidad).
+
+.pull-left[
+Primero cargamos la librería `hillR` previamente instalada:
+
+```{r, warning=FALSE, message=FALSE}
+library(hillR)
+```
+
+Luego calculamos la diversidad taxonómica: 
+
+```{r, eval=F}
+hill_taxa(comunidades, q = 0)
+```
+]
+
+.pull-right[
+De igual forma la diversidad funcional:
+
+```{r, eval=FALSE}
+hill_func(comunidades, funciones, q = 0)
+```
+
+Y por último la diversidad filogenética:
+
+```{r, eval=FALSE}
+hill_phylo(comunidades, arbol, q = 0) 
+```
+]
+
+
+---
+Los resultados que nos da cada función son:
+.pull-left[
+1.  **hill_taxa()** nos da un vector con el va valor de diversidad alfa para cada sitio o muestra, *q* = 0 (por defecto) riqueza de especies , *q* = 1 para obtener shannon (especies frecuentes) y *q* = 2  el inverso de simpson (especies dominantes).
+2. **hill_func()**[`r fontawesome::fa("link", fill = "#5E2129")`](https://www.annualreviews.org/doi/abs/10.1146/annurev-ecolsys-120213-091540)   nos dará una matrix con la información de:
+-   Q : Q de Rao
+-   D_q : el numero efectivo de epecies distintas igualmente abundantes y funcionales
+]
+
+.pull-right[
+
+-   MD_q : diversidad funcional media por especie, la suma efectiva de las distancias por pares entre una especie fija y todas las demás especies
+-   FD_q : diversidad funcional total, la distancia funcional total efectiva entre especies del conjunto
+3.  **hill_phylo** nos dará un vector de diversidad filogenética basada en el número de Hill ('PD(T)', longitud total efectiva de la rama) para todos los sitios.
+]
+---
+
+### Cálculo de la diversidad taxonómica, funcional y filogenética de a través de diferentes sitios o muestras.
+
+<uw-blockquote>Este script calcula la diversidad **gamma**, **alfa**, y **beta** a traves de todas las comunidades o muestras asi como su similitud.</uw-blockquote>
+
+
+Si comm\>2 la diversidad gamma es la diversidad juntada (pooled) del ensamble, la alfa es el promedio de la diversidad a través de todos los sitios y la beta es a través de todas las comunidades.
+
+También nos da la medida de homogeneidad de MacArthur, la similtud local (traslape de especies / overlap similar al de Sorensen) y la similitud regional (traslape de especies  overlap similar al de Jaccard).
+
+---
+
+- Para las comunidades:
+
+```{r}
+hill_taxa_parti(comunidades, q = 0)
+```
+
+- Para las funciones:
+
+```{r}
+hill_func_parti(comunidades, funciones, q = 0)
+```
+---
+
+- Para las filogenias:
+
+```{r}
+hill_phylo_parti(comunidades, arbol, q = 0)
+```
+
+
+---
+### Cálculo de la diversidad pareada taxonómica, funcional y filogenética
+
+<uw-blockquote>Calcula la diversidad pareada gamma, alfa y beta para las comunidades así como la similitud</uw-blockquote>
+
+La diversidad pareada hace el cáclulo entre pares de sitios o muestreasw generando ya sea un data.frame o una matriz de distancia que puede ser usada para futuros análisis multivareado.
+En este ejemplo y por defecto obtendremos el data.frame para la diversidad taxonómica. Y al final haremos un ejemplo de cómo se vería una matriz. 
+---
+- Para las comunidades:
+```{r}
+head(hill_taxa_parti_pairwise(comunidades, q = 0, .progress = FALSE), n = 3)
+```
+
+- Para las funciones:
+```{r}
+head(hill_func_parti_pairwise(comunidades, funciones, q = 0, show_warning = FALSE, .progress =FALSE), n = 3)
+```
+---
+
+- Para las filogenias
+
+```{r}
+head(hill_phylo_parti_pairwise(comunidades, arbol, q = 0, show_warning = FALSE, .progress = FALSE) )
+```
+---
+
+Veamos el ejemplo de cuando queremos obtener las matrices de distancia al orden 0:
+
+```{r}
+beta_q0_mat<-hill_taxa_parti_pairwise(
+  comunidades, q = 0, .progress = FALSE,
+  output = "matrix", pairs = "full")
+```
+
+.pull-left[
+Esta vez en vez de un data.frame nos dará una lista que contendrá 6 elementos, definidos así:
+
+*q =* el orden al cual fue realizado el cálculo
+
+TD_gamma= gamma pareada
+
+TD_alpha=alfa pareada]
+.pull-right[
+Td_beta: dependiendo del orden *q* (*q*=0 Jaccard/Sorensen, *q*=1 Horn y *q*=2 Morisita-Horn).
+
+local_similarity : traslape de especies similar a Sorensen (q=0)
+
+region_similarity: traslape de especies similar a Jaccard (q=0)
+]
+---
+# Ejemplo aplicado
+
+Tomemos la data 'spiders' del paquete iNEXT que veremos más adelante.
+Para más información de estos puedes consultar las referencia [`r fontawesome::fa("link", fill = "#5E2129")`](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/ES11-00155.1)[`r fontawesome::fa("paperclip", fill = "#5E2129")`](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2010.00025.x)
+
+```{r, eval=FALSE}
+library(iNEXT)
+data("spider")
+```
+
+¿Cuál de los dos tratamientos da valores más altos de riqueza?
+---
+
+
+## `betapart`[`r fontawesome::fa("link", fill = "#5E2129")`](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+- El paquete `betapart` fue desarrollado por el mismo autor que introduce los conceptos de partición de la diversidad beta en los componentes de recambio (turnover) y anidamiento (nestedness).
+
+- Para instalarlo ponemos la siguiente línea de código:
+
+```{r, eval=FALSE}
+install.packages("betapart")
+
+```
+
+Primero llamamos al paquete previamente instalado.
+Luego definiremos el conjunto de datos de ejemplo, y diremos que las tres primeras columnas pertenecen a un bosque no perturbado y las tres siguientes a un bosque no perturbado.
+
+---
+
+```{r}
+library(betapart)
+comm<- data.frame(comm =1:6,
+                         sp1=c(2,2,3,0,0,1),
+                         sp2=c(2,2,0,1,1,2),
+                         sp3=c(1,0,1,2,3,2),
+                         sp4=c(1,0,1,0,2,0),
+                         sp5=c(1,2,0,0,0,1),
+                         sp6=c(2,2,1,0,0,0),
+                         sp7=c(0,0,0,1,0,1),
+                         sp8=c(1,0,1,0,1,0), row.names = 1)
+
+
+groups <- factor(c(rep(1,3), rep(2,3)), 
+                 labels = c("noperturbado","perturbado"))
+head(comm);groups
+```
+---
+## `betapart`[`r fontawesome::fa("link", fill = "#5E2129")`](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+Los índices Jaccard y Sorensen en los que está basado este paquete no consideran la abundancia de especies (*q*=0), así que convertiremos nuestra data a tipo incidencia (presencia/ausencia):
+
+```{r}
+ presabs<-ifelse(comm>0,1,0)
+```
+
+Ahora, calcularemos el índice de Sorensen y sus particiones de recambio y anidamiento.
+En su lugar, podemos calcular el índice de Jaccard usando el argumento index.family="jaccard".
+
+```{r}
+ dist_comp<-beta.pair(presabs, index.family="sorensen")
+```
+
+---
+Vemos que el resultado es una lista de tres matrices:
+
+```{r}
+head(dist_comp)
+```
+---
+## `betapart`[`r fontawesome::fa("link", fill = "#5E2129")`](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+<uw-blockquote>Para obtener o extraer la partición del índice de recambio de Sorensen por pares entre comunidades, escriba: dist_comp\$beta.sim</uw-blockquote>
+<uw-blockquote>Para obtener la partición de anidamiento:  dist_comp\$beta.sne</uw-blockquote> 
+<uw-blockquote>Para obtener toda la diversidad beta: dist_comp\$beta.sor</uw-blockquote>
+---
+## `betapart`[`r fontawesome::fa("link", fill = "#5E2129")`](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+
+Ya obtenidas las diversas matrices podemos aplicar cualquier tipo de análisis multivariado deseado.
+
+En el presente ejemplo, si queremos comparar las diversidades beta de las comunidades agregadas por los tratamientos de "no perturbado" y "perturbado", podemos utilizar el análisis "betadisper" del paquete 'vegan':
+
+```{r, warning=FALSE, message=FALSE, fig.height=5, fig.width=8, fig.align='center'}
+library(vegan)
+bd<-betadisper(dist_comp$beta.sor,groups)
+bd.sim<-betadisper(dist_comp$beta.sim,groups)
+bd.sne<-betadisper(dist_comp$beta.sne,groups)
+```
+
+```{r, fig.show="hold", out.width="33%", echo=TRUE, eval=FALSE}
+plot(bd);plot(bd.sim);plot(bd.sne)
+```
+
+---
+
+```{r, figures-side, fig.show="hold", out.width="33%", echo=FALSE}
+plot(bd);plot(bd.sim);plot(bd.sne)
+```
+
+El gráfico de dispersión beta indica que hay una diferencia en la composición de especies de los fragmentos de bosque perturbado y no perturbado explicado de mejor manera por el recambio.
+
+---
+## `betapart`[`r fontawesome::fa("link", fill = "#5E2129")`](https://cran.r-project.org/web/packages/betapart/betapart.pdf)
+Si queremos obtener estos mismos resultados pero para todos los sitios, entonces usamos la función **beta.multi()**:
+
+```{r}
+dist.multi<-beta.multi(presabs,index.family ="sorensen" )
+head(dist.multi)
+```
+---
+class: center, middle
+
+# Ejemplo aplicado
+
+Con la misma data trabajada anteriormente vamos a verificar si dan resultados similares utilizando el índice de Jaccard.
+
+---
+
+## `vegan`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/vegandevs/vegan)
+
+Esta paquetería es una excelente herramienta para analizar datos ecológicos.
+En el caso de alfa diversidad se pueden calcular los índices tradicionales (que no están en el marco de los números de Hill).
+
+Aquí realizaremos un ejemplo con una data que trae de ejemplo que se llama BCI (Barro Colorado Island Tree Counts).
+
+Primero llamamos la data:
+
+```{r}
+data(BCI, BCI.env)
+```
+
+---
+
+Podemos calcular los índices de diversidad alfa, como Shannon, Simpson, el inverso de Simpson, Fisher, Especies observadas, beta y gamma: 
+```{r}
+shannon <- diversity(BCI)
+simpson <- diversity(BCI, "simpson")
+inverso_simp <- diversity(BCI, "inv")
+fisher <- fisher.alpha(BCI)
+especies_num <- specnumber(BCI) 
+alfa <- with(BCI.env, tapply(specnumber(BCI), Habitat, mean))
+gamma <- with(BCI.env, specnumber(BCI, Habitat))
+gamma/alfa - 1
+alfa <- with(BCI.env, tapply(diversity(BCI), Habitat, mean)) # promedio
+gamma <- with(BCI.env, diversity(BCI, groups=Habitat)) # junta
+gamma-alfa
+```
+---
+
+Para la beta divesidad podemos calcular nuestras matrices de distancia con la función 'vegdist':
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+distancias<- vegdist(BCI, method = "jaccard")
+distancias %>% as.matrix() %>% as.data.frame() %>% dplyr::select(1:4) %>% dplyr::slice(1:4)
+
+```
+---
+class: middle, center, inverse
+
+# Parte 2
+
+---
+## `iNEXT`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+- Es un paquete disponible en R para rarefacción y extrapolación de la diversidad de especies en el marco de los números de Hill.
+
+- iNEXT se centra en tres medidas de los números de Hill de orden *q*: riqueza de especies (*q*=0), diversidad de Shannon (*q*=1, la exponencial de la entropía de Shannon) y diversidad de Simpson (*q*=2, la inversa de la concentración de Simpson).
+---
+## `iNEXT`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+Para cada medida iNEXT utiliza la muestra observada para calcular las estimaciones de diversidad para muestras rarificadas y extrapoladas y los intervalos de confianza del 95 %, además de representar gráficamente los dos tipos siguientes de las curvas de rarefacción y extrapolación (R/E):
+
+<uw-blockquote>**Curvas de muestreo R/E basadas en el tamaño de la muestra:** iNEXT calcula estimaciones de diversidad para muestras rarificadas y extrapoladas hasta el doble del tamaño de la muestra de referencia  o un tamaño especificado por el usuario. Este tipo de curva de muestreo traza las estimaciones de diversidad con respecto al tamaño de la muestra. </uw-blockquote>
+---
+<uw-blockquote>**Curvas de muestreo R/E basadas en la cobertura:** iNEXT calcula estimaciones de diversidad para muestras enrarecidas y extrapoladas con integridad de la muestra (medida por la cobertura de la muestra) hasta el valor de cobertura del doble del tamaño de la muestra de referencia o una cobertura especificada por el usuario. Este tipo de curva de muestreo traza las estimaciones de diversidad con respecto a la cobertura de la muestra.</uw-blockquote>
+
+Además de los dos tipos anteriores de curvas de muestreo, iNEXT también traza una **curva de completitud de la muestra**, que describe cómo varía la estimación de la cobertura de la muestra en función del tamaño de la muestra.
+La curva de integridad de la muestra se puede considerar como un puente que conecta los dos tipos de curvas mencionados anteriormente.
+---
+## `iNEXT`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+Para instalar este paquete:
+
+```{r, eval=FALSE}
+## instalando iNEXT del CRAN
+install.packages("iNEXT")
+```
+
+
+```{r, eval=FALSE}
+## instalando la versión de desarrollo
+install.packages('devtools')
+library(devtools)
+install_github('AnneChao/iNEXT')
+```
+
+```{r, warning=FALSE, message=FALSE}
+## cargando el paquete
+library(iNEXT)
+library(ggplot2)
+```
+
+---
+## `iNEXT`[`r fontawesome::fa("link", fill = "#5E2129")`](https://github.com/JohnsonHsieh/iNEXT): iNterpolation and EXTrapolation
+
+La función principal es:
+
+```{r, eval=FALSE}
+iNEXT(x, q=0, datatype="abundance", se=TRUE, conf=0.95, nboot=50)
+
+```
+
+
+Donde:
+
+-   x : es la data,
+
+-   datatype: puede ser "abundance" ó "incidence_raw", ó "incidence_freq",
+
+-   se: TRUE o FALSE si se quiere hacer un muestreo tipo 'bootsrap',
+
+-   conf: el intervalo de confianza,
+
+-   nboot: número de replicaciones de 'bootsrap'
+
+---
+iNEXT(x, q=0, datatype="abundance", se=TRUE, conf=0.95, nboot=50)
+
+
+Correremos el ejemplo con la data del paquete, vista anteriormente **spider**:
+
+```{r}
+data("spider")
+str(spider)
+out <- iNEXT(spider, q=c(0, 1, 2), datatype="abundance")
+```
+
+```{r, eval=F}
+out
+```
+---
+Si vemos el output de iNEXT nos da una lista con tres elementos:
+
+>- **\$DataInfo** que nos resume la información de la data
+
+>-  **\$iNextEst** los estimados para las muestras rarificadas y extrapoladas (datos para las curvas)
+
+> - **\$AsyEst** muestra la diversidad estimada</uw-blockquote>
+
+
+---
+-   Podemos obtener ahora nuestras curvas por sitio o en este caso por tratamiento a los 3 órdenes:
+
+```{r, fig.width=12, fig.align='center'}
+ggiNEXT(out, type=1, facet.var="site")
+```
+---
+
+-   También podemos obtener ahora nuestras curvas de cobertura:
+
+```{r, fig.width=12, fig.align='center'}
+ggiNEXT(out, type=2)
+```
+
+---
+-   Por último una gráfica de diversidad de especies vs cobertura para los tratamientos:
+
+```{r, fig.width=12, fig.align='center'}
+ggiNEXT(out, type=3, facet.var="site")
+```
+
+---
+
+-   Y a los diferentes órdenes:
+
+```{r, fig.width=12, fig.align='center'}
+ggiNEXT(out, type=3, facet.var="order")
+```
+
+---
+
+- Ahora si se quiere sólo los índices basandonos ya sea en abundancia o incidencia y en tamaño o cobertura, usamos la función **estimateD**, así:
+
+```{r, warning=FALSE, message=FALSE}
+estimateD(spider$Logged, datatype="abundance", base="size",  conf=0.95)
+```
+
+```{r, warning=FALSE, message=FALSE}
+estimateD(spider$Girdled, datatype="abundance", base="size",  conf=0.95)
+```
+
+---
+
+### Ejemplo aplicado
+
+
+Apliquemos lo visto usando como ejemplo pequeño con datos de incidencia (presencia/ausencia):
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+data(ciliates)
+#str(ciliates)
+```
+
+---
+
+# Otras funciones
+
+Este paquete también cuenta con otras funciones de interés, tales como:
+
+-   ChaoEntropy() : Estimación de la entropía/diversidad de Shannon
+
+-   ChaoRichness(): Estimación de la riqueza de especies
+
+-   ChaoShannon(): Estimación de la entropía/diversidad de Shannon
+
+-   ChaoSimpson(): Estimación del índice de Gini-Simpson o diversidad de Simpson
+
+-   ChaoSpecies(): Estimación de la riqueza de especies
+
+-   EstSimpson: Estimación del índice de Gini-Simpson o diversidad de Simpson
+
+---
+
+# Un ejemplo
+
+```{r}
+ChaoRichness(spider)
+ChaoShannon(spider)
+```
+
+---
+## Curvas en vegan
+
+```{r, warning=FALSE, message=FALSE}
+library(vegan)
+data("BCI")
+head(BCI)[1:4,1:4]
+```
+
+
+---
+## Curvas en vegan
+
+```{r, warning=FALSE, message=FALSE, fig.height=6, fig.align='center'}
+#por sitios
+sac <- specaccum(BCI)
+plot(sac, ci.type="polygon") #ver vegan para opciones
+```
+
+---
+## Curvas en vegan
+
+```{r, warning=FALSE, message=FALSE, fig.height=6, fig.align='center'}
+#por individuos
+sac <- specaccum(BCI, method = "rarefaction")
+plot(sac, xvar = "individual", ci.type="polygon") 
+```
+
+
+|   
+
+
+
