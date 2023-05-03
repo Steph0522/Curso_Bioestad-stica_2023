@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bioestadística en R - parte práctica clase 1, Módulo 2 : Estadística paramétrica y no paramétrica</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Dra. Stephanie Hereira Pacheco" />
+    <script src="Clase1_files/header-attrs-2.21/header-attrs.js"></script>
+    <script src="Clase1_files/clipboard-2.0.6/clipboard.min.js"></script>
+    <link href="Clase1_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="Clase1_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="Clase1_files/font-awesome-6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="Clase1_files/font-awesome-6.4.0/css/v4-shims.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Bioestadística en R - parte práctica clase 1, Módulo 2 : Estadística paramétrica y no paramétrica
+]
+.author[
+### Dra. Stephanie Hereira Pacheco
+]
+.institute[
+### CTCB, UATx
+]
+.date[
+### 08-05-2023
+]
+
+---
+
+
+
+
+
+
+
+
+.pull-left[
+![](https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/1617710_1048843451811700_2278987052727773097_o-1920x805.jpg)
+&lt;img src="https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/uatx-logo.png" width="200px" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="https://pcb.ctbcuatx.edu.mx/wp-content/uploads/2020/07/PCBuwide-1024x426.jpg" width="500px" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://pbs.twimg.com/profile_images/1059608114805141504/SWOqgSmO_400x400.jpg" width="300px" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+# Contenido
+
++ Probando normalidad: métodos gráficos y numéricos
+
++ Tablas de contingencia
+
+    - chisq.test()
+
+    - fisher.test()
+     
++ Pruebas estadísticas
+
+    - 1 variable cuantitativa y 2 grupos independientes: t test y U de Mann-Whitney
+    
+    
+---
+## Supuestos de las pruebas paramétricas
+
+
+- Distribución conocida (**normal**).
+
+- Homocedasticidad.
+
+- Otros: tamaño de la muestra, variables cuantitativas o continuas, outliers, aleatoriedad, independencia de las observaciones, linealidad. 
+
+
+
+.center[*** Cada tipo de prueba paramétrica tiene sus propios supuestos***]
+
+---
+### Explorando la data
+
+
+```r
+data("PlantGrowth")
+datos &lt;- PlantGrowth
+str(datos)
+```
+
+```
+## 'data.frame':	30 obs. of  2 variables:
+##  $ weight: num  4.17 5.58 5.18 6.11 4.5 4.61 5.17 4.53 5.33 5.14 ...
+##  $ group : Factor w/ 3 levels "ctrl","trt1",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+```r
+head(datos)
+```
+
+```
+##   weight group
+## 1   4.17  ctrl
+## 2   5.58  ctrl
+## 3   5.18  ctrl
+## 4   6.11  ctrl
+## 5   4.50  ctrl
+## 6   4.61  ctrl
+```
+
+
+---
+
+### Distribución normal: métodos gráficos
+
+.pull-left[
+
+```r
+library(ggpubr)
+ggdensity(datos$weight) 
+```
+
+![](Clase1_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+]
+.pull-right[
+
+```r
+library(car)
+car::qqPlot(datos$weight)
+```
+
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+```
+## [1] 14 16
+```
+]
+---
+### Modelo lineal
+
+```r
+modelo &lt;- lm(weight ~ group, data = datos)
+summary(modelo)
+```
+
+```
+## 
+## Call:
+## lm(formula = weight ~ group, data = datos)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.0710 -0.4180 -0.0060  0.2627  1.3690 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   5.0320     0.1971  25.527   &lt;2e-16 ***
+## grouptrt1    -0.3710     0.2788  -1.331   0.1944    
+## grouptrt2     0.4940     0.2788   1.772   0.0877 .  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.6234 on 27 degrees of freedom
+## Multiple R-squared:  0.2641,	Adjusted R-squared:  0.2096 
+## F-statistic: 4.846 on 2 and 27 DF,  p-value: 0.01591
+```
+
+---
+
+### Distribución normal: métodos gráficos
+
+.pull-left[
+
+```r
+plot(modelo, which = 2)
+```
+
+![](Clase1_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+]
+.pull-right[
+
+```r
+hist(modelo$residuals)
+```
+
+![](Clase1_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+---
+
+]
+
+---
+### Distribución normal: métodos numéricos
+
+.pull-left[
+
+
+```r
+shapiro.test(datos$weight)
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  datos$weight
+## W = 0.98268, p-value = 0.8915
+```
+
+```r
+shapiro.test(modelo$residuals)
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  modelo$residuals
+## W = 0.96607, p-value = 0.4379
+```
+
+]
+.pull-right[
+
+
+```r
+ctrl&lt;- datos %&gt;% filter(group=="ctrl")
+tr1&lt;- datos %&gt;% filter(group=="trt1")
+tr2&lt;- datos %&gt;% filter(group=="trt2")
+
+ro1&lt;- ctrl$weight - tr1$weight
+ro2&lt;- ctrl$weight-tr2$weight
+ro3&lt;- tr1$weight-tr2$weight
+
+shapiro.test(c(ro1,ro2,ro3))
+```
+
+]
+---
+## Otras pruebas
+
+.pull-left[
+
+```r
+library(nortest)
+ad.test(datos$weight)
+```
+
+```
+## 
+## 	Anderson-Darling normality test
+## 
+## data:  datos$weight
+## A = 0.15066, p-value = 0.9567
+```
+
+```r
+cvm.test(datos$weight)
+```
+
+```
+## 
+## 	Cramer-von Mises normality test
+## 
+## data:  datos$weight
+## W = 0.021574, p-value = 0.9491
+```
+]
+.pull-right[
+
+```r
+lillie.test(datos$weight)
+```
+
+```
+## 
+## 	Lilliefors (Kolmogorov-Smirnov) normality test
+## 
+## data:  datos$weight
+## D = 0.093387, p-value = 0.7242
+```
+
+```r
+pearson.test(datos$weight)
+```
+
+```
+## 
+## 	Pearson chi-square normality test
+## 
+## data:  datos$weight
+## P = 2.5333, p-value = 0.7715
+```
+
+]
+
+
+---
+## Probando heterocedasticidad
+.pull-left[
+
+
+
+
+```r
+data("ToothGrowth")
+boxplot(len ~ supp, data=ToothGrowth, col=c("red", "blue"), main="Dientes")
+```
+
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+
+```r
+data("iris")
+boxplot(Petal.Width ~ Species, data=iris, col=c("pink", "purple", "cyan"), main="Flores")
+```
+
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+---
+## Probando heterocedasticidad
+.pull-left[
+
+```r
+aggregate(len ~ supp, data = ToothGrowth, var)
+```
+
+```
+##   supp      len
+## 1   OJ 43.63344
+## 2   VC 68.32723
+```
+Ratio
+
+```r
+68.32 /  43.63
+```
+
+```
+## [1] 1.565895
+```
+
+]
+.pull-right[
+
+```r
+aggregate(Petal.Width ~ Species, data = iris, var)
+```
+
+```
+##      Species Petal.Width
+## 1     setosa  0.01110612
+## 2 versicolor  0.03910612
+## 3  virginica  0.07543265
+```
+Ratio
+
+```r
+r1&lt;-0.03910612 / 0.01110612 #versicolor vs setosa
+r2&lt;-0.07543265 / 0.01110612 #virginca vs setosa
+r3&lt;-0.07543264 / 0.03910612 #virginica vs versicolor
+cbind(r1,r2,r3)
+```
+
+```
+##            r1       r2       r3
+## [1,] 3.521132 6.791989 1.928922
+```
+]
+---
+### Probando heterocedasticidad
+.pull-left[
+
+```r
+m1&lt;-lm(len ~ supp, data=ToothGrowth)
+par(mfrow = c(1, 2))
+plot(m1, which=c(1,3))
+```
+
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-21-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+
+```r
+m2&lt;-lm(Petal.Width ~ Species, data=iris)
+par(mfrow = c(1, 2))
+plot(m2, which=c(1,3))
+```
+
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+### Probando heterocedasticidad
+
+
+.pull-left[
+Prueba para dos niveles = F
+
+
+```r
+var.test(len ~ supp, data = ToothGrowth) 
+```
+
+```
+## 
+## 	F test to compare two variances
+## 
+## data:  len by supp
+## F = 0.6386, num df = 29, denom df = 29, p-value = 0.2331
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.3039488 1.3416857
+## sample estimates:
+## ratio of variances 
+##          0.6385951
+```
+]
+
+
+.pull-right[
+
+
+```r
+lmtest::bptest(m2) #sobre un modelo
+```
+
+```
+## 
+## 	studentized Breusch-Pagan test
+## 
+## data:  m2
+## BP = 25.099, df = 2, p-value = 3.546e-06
+```
+
+]
+---
+## Otras pruebas
+
+
+
+```r
+GAD::C.test(m2)
+```
+
+```
+## 
+## 	Cochran test of homogeneity of variances
+## 
+## data:  m2
+## C = 0.60036, n = 50, k = 3, p-value = 5.531e-06
+## alternative hypothesis: Group virginica has outlying variance
+## sample estimates:
+##     setosa versicolor  virginica 
+##     0.0111     0.0391     0.0754
+```
+
+
+
+```r
+car::leveneTest(m2)
+```
+
+```
+## Levene's Test for Homogeneity of Variance (center = median)
+##        Df F value    Pr(&gt;F)    
+## group   2  19.892 2.261e-08 ***
+##       147                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+# Tablas de contingencia
+
+```r
+library(tidyverse)
+iris %&gt;% glimpse()
+```
+
+```
+## Rows: 150
+## Columns: 5
+## $ Sepal.Length &lt;dbl&gt; 5.1, 4.9, 4.7, 4.6, 5.0, 5.4, 4.6, 5.0, 4.4, 4.9, 5.4, 4.…
+## $ Sepal.Width  &lt;dbl&gt; 3.5, 3.0, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1, 3.7, 3.…
+## $ Petal.Length &lt;dbl&gt; 1.4, 1.4, 1.3, 1.5, 1.4, 1.7, 1.4, 1.5, 1.4, 1.5, 1.5, 1.…
+## $ Petal.Width  &lt;dbl&gt; 0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.3, 0.2, 0.2, 0.1, 0.2, 0.…
+## $ Species      &lt;fct&gt; setosa, setosa, setosa, setosa, setosa, setosa, setosa, s…
+```
+
+Vamos a categorizar la variable *Largo del Sépalo* de **iris**, haciendo 'pequeño' las valores que estén por debajo de la mediana y 'grande' los que estén por encima de la mediana.
+
+
+```r
+iris$size_sepal &lt;- ifelse(iris$Sepal.Length &lt; median(
+  iris$Sepal.Length), "pequeño", "grande")
+```
+---
+### Tablas de contingencia
+.pull-left[
+Luego construiremos una tabla de contingencia a partir de esto:
+
+```r
+tabla_contingencia&lt;-table(iris$Species, iris$size_sepal)
+tabla_contingencia
+```
+
+```
+##             
+##              grande pequeño
+##   setosa          1      49
+##   versicolor     29      21
+##   virginica      47       3
+```
+]
+
+.pull-rigth[
+Gráficamente se ve así:
+&lt;img src="Clase1_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+Queremos saber si la especie tiene un efecto sobre el largo del sépalo (variable categorizada).
+]
+---
+.pull-left[
+### Prueba de Fisher
+
+
+```r
+fisher.test(tabla_contingencia)
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  tabla_contingencia
+## p-value &lt; 2.2e-16
+## alternative hypothesis: two.sided
+```
+]
+.pull-right[
+### Prueba de Chi-cuadrado 
+
+```r
+chisq.test(tabla_contingencia)
+```
+
+```
+## 
+## 	Pearson's Chi-squared test
+## 
+## data:  tabla_contingencia
+## X-squared = 86.035, df = 2, p-value &lt; 2.2e-16
+```
+]
+
+Así que rechazamos la hipótesis nula para la prueba de independencia Chi-cuadrado y de Fisher, esto significa que existe una relación y/o diferencia significativa entre la especie y el tamaño del sépalo.
+---
+# Pruebas estadísticas: 1 variable cuantitativa y 2 grupos independientes:
+
+- t test (paramétrica)
+
+- U de Mann-Whiteney (no paramétrica)
+
+---
+### Ejemplo de una muestra
+
+.pull-left[
+
+
+```r
+data&lt;- data.frame(Congelador=1:10,
+                  Temperatura=c(-2.14,-0.8,
+                                -2.75,-2.58,   
+                                -2.26,-2.46,
+                                -1.33,-2.85,
+                                -0.93,-2.01))
+shapiro.test(data$Temperatura)
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  data$Temperatura
+## W = 0.8928, p-value = 0.1823
+```
+]
+.pull-rigth[
+
+
+```r
+t.test(data$Temperatura, mu = 0, alternative = "less")
+```
+
+```
+## 
+## 	One Sample t-test
+## 
+## data:  data$Temperatura
+## t = -8.5724, df = 9, p-value = 6.346e-06
+## alternative hypothesis: true mean is less than 0
+## 95 percent confidence interval:
+##       -Inf -1.580971
+## sample estimates:
+## mean of x 
+##    -2.011
+```
+]
+
+---
+
+### t de Student para dos grupos: Ejemplo 
+.pull-left[
+
+```r
+freidora&lt;- data.frame(
+  Oster1=c(4.72,7.40,3.50,3.85,4.47,
+           4.09,6.34,3.30,7.13,4.99),
+  Oster2=c(9.19,11.44,9.64,12.09,10.80,
+           12.71,10.04,9.06,6.31,9.44))
+ro1&lt;- freidora$Oster1-mean(freidora$Oster1)
+ro2&lt;- freidora$Oster2-mean(freidora$Oster2)
+
+shapiro.test(c(ro1,ro2))
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  c(ro1, ro2)
+## W = 0.9483, p-value = 0.342
+```
+
+]
+.pull-right[
+
+|Oster1|Oster2|
+|:----:|:----:|
+| 4.72 | 9.19 |
+| 7.40 |11.44 |
+| 3.50 | 9.64 |
+| 3.85 |12.09 |
+| 4.47 |10.80 |
+| 4.09 |12.71 |
+| 6.34 |10.04 |
+| 3.30 | 9.06 |
+| 7.13 | 6.31 |
+| 4.99 | 9.44 |
+]
+
+---
+### t de Student para dos grupos: Ejemplo 
+
+
+
+```r
+t.test(freidora$Oster1, freidora$Oster2, mu=0, paired=FALSE, alternative="two.sided", var.equal=TRUE)
+```
+
+```
+## 
+## 	Two Sample t-test
+## 
+## data:  freidora$Oster1 and freidora$Oster2
+## t = -6.8527, df = 18, p-value = 2.063e-06
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -6.654429 -3.531571
+## sample estimates:
+## mean of x mean of y 
+##     4.979    10.072
+```
+
+
+---
+
+## Prueba de Welch
+
+Para los casos donde no se cumplen que las varianzas sean iguales u homogéneas.
+
+
+```r
+t.test(freidora$Oster1, freidora$Oster2, mu=0, paired=FALSE, alternative="two.sided", var.equal=FALSE)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  freidora$Oster1 and freidora$Oster2
+## t = -6.8527, df = 17.268, p-value = 2.58e-06
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -6.659188 -3.526812
+## sample estimates:
+## mean of x mean of y 
+##     4.979    10.072
+```
+
+---
+### U Mann Whitney - Ejemplo
+.pull-left[
+
+```r
+data_u&lt;- data.frame(Control=c(12, 22, 38, 42, 50),
+                    Tratamiento=c(14, 25, 40, 44, 48))
+```
+
+
+```r
+knitr::kable(data_u, align = "c")
+```
+
+
+
+| Control | Tratamiento |
+|:-------:|:-----------:|
+|   12    |     14      |
+|   22    |     25      |
+|   38    |     40      |
+|   42    |     44      |
+|   50    |     48      |
+]
+.pull-right[
+
+```r
+wilcox.test(data_u$Control, data_u$Tratamiento, paired = FALSE)
+```
+
+```
+## 
+## 	Wilcoxon rank sum exact test
+## 
+## data:  data_u$Control and data_u$Tratamiento
+## W = 11, p-value = 0.8413
+## alternative hypothesis: true location shift is not equal to 0
+```
+]
+
+---
+
+class: inverse, center, middle
+
+# MUCHAS GRACIAS.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

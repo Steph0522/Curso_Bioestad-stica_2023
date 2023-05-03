@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bioestadística en R - parte práctica clase 2, Módulo 2 : Estadística paramétrica y no paramétrica</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Dra. Stephanie Hereira Pacheco" />
+    <script src="Clase2_files/header-attrs-2.21/header-attrs.js"></script>
+    <script src="Clase2_files/clipboard-2.0.6/clipboard.min.js"></script>
+    <link href="Clase2_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="Clase2_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="Clase2_files/font-awesome-6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="Clase2_files/font-awesome-6.4.0/css/v4-shims.min.css" rel="stylesheet" />
+    <script src="Clase2_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="Clase2_files/lightable-0.0.1/lightable.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Bioestadística en R - parte práctica clase 2, Módulo 2 : Estadística paramétrica y no paramétrica
+]
+.author[
+### Dra. Stephanie Hereira Pacheco
+]
+.institute[
+### CTCB, UATx
+]
+.date[
+### 09-05-2023
+]
+
+---
+
+
+
+
+
+
+
+
+.pull-left[
+![](https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/1617710_1048843451811700_2278987052727773097_o-1920x805.jpg)
+&lt;img src="https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/uatx-logo.png" width="200px" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="https://pcb.ctbcuatx.edu.mx/wp-content/uploads/2020/07/PCBuwide-1024x426.jpg" width="500px" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://pbs.twimg.com/profile_images/1059608114805141504/SWOqgSmO_400x400.jpg" width="300px" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Contenido
+
++ Pruebas estadísticas
+
+    - 1 variable cuantitativa, 2 grupos emparejados: t test pareada y prueba de Wilcoxon
+    - 1 variable cuantitativa &gt;2 grupos independientes: ANOVA 1 vía y Kruskal-Wallis
+    - 1 variable cuantitativa &gt;2 grupos dependientes: ANOVA por bloques y Friedman test
+    - Comparaciones múltiples: Tukey HSD y Mann-Whitney/Friedman test (Corrección del valor p)
+   
+---
+## 1 variable cuantitativa, 2 grupos emparejados: t test pareada 
+
+- Data ejemplo:
+
+```r
+datos_ejemplo&lt;- data.frame(Pan=1:10,
+                         Temp_pre=c(20.83,19.72,19.64,20.09,22.25,
+                                   20.83,21.31,22.50,21.17,19.57),
+                         Temp_post=c(100.87,98.58,109.09,121.83,122.78,
+                                     111.41,103.96,121.81,127.85,115.17))
+
+datos_ejemplo$Diferencia&lt;- datos_ejemplo$Temp_post - datos_ejemplo$Temp_pre
+
+datos_ejemplo$Diferencia
+```
+
+```
+##  [1]  80.04  78.86  89.45 101.74 100.53  90.58  82.65  99.31 106.68  95.60
+```
+
+---
+
+| Pan | Temp_pre | Temp_post | Diferencia |
+|:---:|:--------:|:---------:|:----------:|
+|  1  |  20.83   |  100.87   |   80.04    |
+|  2  |  19.72   |   98.58   |   78.86    |
+|  3  |  19.64   |  109.09   |   89.45    |
+|  4  |  20.09   |  121.83   |   101.74   |
+|  5  |  22.25   |  122.78   |   100.53   |
+|  6  |  20.83   |  111.41   |   90.58    |
+|  7  |  21.31   |  103.96   |   82.65    |
+|  8  |  22.50   |  121.81   |   99.31    |
+|  9  |  21.17   |  127.85   |   106.68   |
+| 10  |  19.57   |  115.17   |   95.60    |
+
+---
+### 1 variable cuantitativa, 2 grupos emparejados: t test pareada 
+
+
+```r
+shapiro.test(datos_ejemplo$Diferencia)
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  datos_ejemplo$Diferencia
+## W = 0.93611, p-value = 0.5106
+```
+
+
+```r
+t.test(datos_ejemplo$Temp_post, datos_ejemplo$Temp_pre, alternative = "greater", paired = TRUE)
+```
+
+```
+## 
+## 	Paired t-test
+## 
+## data:  datos_ejemplo$Temp_post and datos_ejemplo$Temp_pre
+## t = 29.969, df = 9, p-value = 1.253e-10
+## alternative hypothesis: true mean difference is greater than 0
+## 95 percent confidence interval:
+##  86.88337      Inf
+## sample estimates:
+## mean difference 
+##          92.544
+```
+
+---
+# 1 variable cuantitativa, 2 grupos emparejados: Wilcoxon
+
+
+```r
+datos_ejemplo2&lt;- data.frame(Observ=c(1:11),
+                    Antes=c(1,8,0,0,1,3,3,3,5,6,5),
+                    Después=c(3,5,-2,-1,1,-5,-7,-362,-1,0,-10))
+
+datos_ejemplo2$Diferencia&lt;- datos_ejemplo2$Antes-datos_ejemplo2$Después
+
+datos_ejemplo2$Diferencia
+```
+
+```
+##  [1]  -2   3   2   1   0   8  10 365   6   6  15
+```
+---
+### 1 variable cuantitativa, 2 grupos emparejados: Wilcoxon
+
+&lt;table class=" lightable-paper" style='font-family: "Arial Narrow", arial, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;'&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:center;"&gt; Observ &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Antes &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Después &lt;/th&gt;
+   &lt;th style="text-align:center;"&gt; Diferencia &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -2 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 8 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -7 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 10 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 8 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -362 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 365 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -1 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 6 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:center;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; -10 &lt;/td&gt;
+   &lt;td style="text-align:center;"&gt; 15 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+## 1 variable cuantitativa, 2 grupos emparejados: Wilcoxon
+
+```r
+shapiro.test(datos_ejemplo2$Diferencia)
+```
+
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  datos_ejemplo2$Diferencia
+## W = 0.38627, p-value = 6.777e-08
+```
+
+
+
+```r
+wilcox.test(datos_ejemplo2$Antes, datos_ejemplo2$Después, paired = TRUE)
+```
+
+```
+## 
+## 	Wilcoxon signed rank test with continuity correction
+## 
+## data:  datos_ejemplo2$Antes and datos_ejemplo2$Después
+## V = 52.5, p-value = 0.0124
+## alternative hypothesis: true location shift is not equal to 0
+```
+---
+### 1 variable cuantitativa &gt;2 grupos independientes: ANOVA 1 vía 
+
+
+```r
+datos&lt;- PlantGrowth
+str(datos)
+```
+
+```
+## 'data.frame':	30 obs. of  2 variables:
+##  $ weight: num  4.17 5.58 5.18 6.11 4.5 4.61 5.17 4.53 5.33 5.14 ...
+##  $ group : Factor w/ 3 levels "ctrl","trt1",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+
+```r
+modelo&lt;- lm(weight~group, data = datos)
+```
+
+
+---
+### Probando los supuestos
+
+
+
+```r
+par(mfrow = c(2, 2))
+plot(modelo)
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+## ANOVA 1 vía 
+
+```r
+anova_R&lt;- aov(modelo)
+summary(anova_R)    
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## group        2  3.766  1.8832   4.846 0.0159 *
+## Residuals   27 10.492  0.3886                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+## 1 variable cuantitativa y &gt;2 grupos independientes: Kruskal Wallis
+
+
+```r
+datos2 &lt;- data.frame(
+  dieta = c(rep("dieta1", 18), rep("dieta2", 18), rep("dieta3", 18)),
+  n_huevos = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 27, 28, 29, 30, 51, 52, 53, 342, 40,
+               41, 42, 43, 44, 45, 46, 47, 48, 67, 88, 89, 90, 91,92, 93, 94, 293,
+               19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 25, 36, 37, 58, 59, 60, 71, 72)
+)
+str(datos2)
+```
+
+```
+## 'data.frame':	54 obs. of  2 variables:
+##  $ dieta   : chr  "dieta1" "dieta1" "dieta1" "dieta1" ...
+##  $ n_huevos: num  1 2 3 4 5 6 7 8 9 16 ...
+```
+
+```r
+modelo2&lt;- lm(n_huevos~dieta, data = datos2)
+```
+---
+
+### Probando supuestos
+
+
+```r
+par(mfrow = c(2, 2))
+plot(modelo2)
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" /&gt;
+---
+## Kruskal- Wallis test
+
+```r
+ kruskal.test(n_huevos ~ dieta, data = datos2)
+```
+
+```
+## 
+## 	Kruskal-Wallis rank sum test
+## 
+## data:  n_huevos by dieta
+## Kruskal-Wallis chi-squared = 19.964, df = 2, p-value = 4.623e-05
+```
+
+---
+## 1 variable cuantitativa &gt;2 grupos dependientes: ANOVA por bloques 
+
+```r
+library(BHH2)
+data(penicillin.data)
+penicilina&lt;- penicillin.data
+str(penicilina)
+```
+
+```
+## 'data.frame':	20 obs. of  4 variables:
+##  $ blend: Factor w/ 5 levels "B1","B2","B3",..: 1 2 3 4 5 1 2 3 4 5 ...
+##  $ run  : int  1 4 2 1 3 3 2 1 3 4 ...
+##  $ treat: Factor w/ 4 levels "A","B","C","D": 1 1 1 1 1 2 2 2 2 2 ...
+##  $ yield: int  89 84 81 87 79 88 77 87 92 81 ...
+```
+---
+
+```r
+plot(yield~blend+treat, data = penicilina)
+```
+
+![](Clase2_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;![](Clase2_files/figure-html/unnamed-chunk-20-2.png)&lt;!-- --&gt;
+---
+
+```r
+modelo3&lt;- lm(yield~blend+treat, data = penicilina)
+```
+
+
+```r
+par(mfrow = c(2, 2))
+plot(modelo3)
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+# Anova por bloques
+
+
+```r
+anova(lm(yield~ blend+treat,data = penicilina))
+```
+
+```
+## Analysis of Variance Table
+## 
+## Response: yield
+##           Df Sum Sq Mean Sq F value  Pr(&gt;F)  
+## blend      4    264  66.000  3.5044 0.04075 *
+## treat      3     70  23.333  1.2389 0.33866  
+## Residuals 12    226  18.833                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+
+# Friedman test
+
+
+```r
+friedman.test(yield~ blend|treat,data = penicilina)
+```
+
+```
+## 
+## 	Friedman rank sum test
+## 
+## data:  yield and blend and treat
+## Friedman chi-squared = 8.2, df = 4, p-value = 0.08452
+```
+
+---
+## Comparaciones múltiples
+
+
+```r
+summary(anova_R)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## group        2  3.766  1.8832   4.846 0.0159 *
+## Residuals   27 10.492  0.3886                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+### Pruebas pareadas (t.test) con correcciones
+
+- Bonferroni, Holm-Bonferroni, FDR, entre otras.
+
+
+
+```r
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "holm")
+```
+
+```
+## 
+## 	Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  datos$weight and datos$group 
+## 
+##      ctrl  trt1 
+## trt1 0.194 -    
+## trt2 0.175 0.013
+## 
+## P value adjustment method: holm
+```
+
+---
+
+```r
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "bonferroni")
+```
+
+```
+## 
+## 	Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  datos$weight and datos$group 
+## 
+##      ctrl  trt1 
+## trt1 0.583 -    
+## trt2 0.263 0.013
+## 
+## P value adjustment method: bonferroni
+```
+
+
+
+```r
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "BH")
+```
+
+```
+## 
+## 	Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  datos$weight and datos$group 
+## 
+##      ctrl  trt1 
+## trt1 0.194 -    
+## trt2 0.132 0.013
+## 
+## P value adjustment method: BH
+```
+
+---
+## Comparaciones múltiples: Tukey HSD
+
+```r
+TukeyHSD(anova_R, ordered = TRUE)
+```
+
+```
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+##     factor levels have been ordered
+## 
+## Fit: aov(formula = modelo)
+## 
+## $group
+##            diff        lwr      upr     p adj
+## ctrl-trt1 0.371 -0.3202161 1.062216 0.3908711
+## trt2-trt1 0.865  0.1737839 1.556216 0.0120064
+## trt2-ctrl 0.494 -0.1972161 1.185216 0.1979960
+```
+---
+
+```r
+plot(TukeyHSD(anova_R, ordered = TRUE))
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-30-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+```r
+agricolae::HSD.test(anova_R, "group", group = TRUE, console = TRUE)
+```
+
+```
+## 
+## Study: anova_R ~ "group"
+## 
+## HSD Test for weight 
+## 
+## Mean Square Error:  0.3885959 
+## 
+## group,  means
+## 
+##      weight       std  r  Min  Max
+## ctrl  5.032 0.5830914 10 4.17 6.11
+## trt1  4.661 0.7936757 10 3.59 6.03
+## trt2  5.526 0.4425733 10 4.92 6.31
+## 
+## Alpha: 0.05 ; DF Error: 27 
+## Critical Value of Studentized Range: 3.506426 
+## 
+## Minimun Significant Difference: 0.6912161 
+## 
+## Treatments with the same letter are not significantly different.
+## 
+##      weight groups
+## trt2  5.526      a
+## ctrl  5.032     ab
+## trt1  4.661      b
+```
+---
+
+```r
+plot(agricolae::HSD.test(anova_R, "group", group = TRUE))
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-32-1.png" style="display: block; margin: auto;" /&gt;
+---
+.pull-left[
+
+```r
+library(ggplot2)
+library(ggpubr)
+comparaciones&lt;-  list( c("ctrl", "trt1"), c("trt1", "trt2"), c("ctrl", "trt2") )
+t_test&lt;- compare_means(weight ~ group, comparisons = comparaciones, p.adjust.method = "bonferroni", method='t.test', data = datos)
+datos %&gt;% ggbarplot(x = "group", y = "weight", fill = "group", add = "mean_sd")+
+  stat_compare_means(method = "aov", label.y = 9) +
+  stat_pvalue_manual(t_test, label = "p.adj", 
+    y.position = c(7, 7.7, 8.3))
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-33-1.png" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+
+```r
+datos %&gt;% ggbarplot(x = "group", y = "weight", fill = "group", add = "mean_sd")+
+  stat_compare_means(method = "aov")+ annotate(geom = "text",     
+           label = c("a", "c", "b"),   
+           x = c("ctrl", "trt1", "trt2"),            
+           y = c(5.032+1, 4.661+1, 5.526+1),   
+           size = 5, fontface = "bold")
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-34-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+### Comparaciones múltiples: Wilcoxon/U Mann Withney
+
+```r
+pairwise.wilcox.test(datos2$n_huevos, datos2$dieta, p.adjust.method = "bonf")
+```
+
+```
+## 
+## 	Pairwise comparisons using Wilcoxon rank sum exact test 
+## 
+## data:  datos2$n_huevos and datos2$dieta 
+## 
+##        dieta1  dieta2 
+## dieta2 0.00029 -      
+## dieta3 0.14386 0.00087
+## 
+## P value adjustment method: bonferroni
+```
+
+---
+
+```r
+comparaciones&lt;-  list( c("dieta1", "dieta2"), c("dieta2", "dieta3"), c("dieta1", "dieta3") )
+datos2 %&gt;% ggboxplot(x = "dieta", y = "n_huevos", fill = "dieta")+
+  stat_compare_means(label.y = 500)+
+  stat_compare_means(comparisons = comparaciones)
+```
+
+&lt;img src="Clase2_files/figure-html/unnamed-chunk-36-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# MUCHAS GRACIAS.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

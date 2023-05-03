@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Bioestadística en R - parte práctica clase 3, Módulo 2 : Estadística paramétrica y no paramétrica</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Dra. Stephanie Hereira Pacheco" />
+    <script src="Clase3_files/header-attrs-2.21/header-attrs.js"></script>
+    <script src="Clase3_files/clipboard-2.0.6/clipboard.min.js"></script>
+    <link href="Clase3_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="Clase3_files/xaringanExtra-clipboard-0.2.6/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"<i class=\"fa fa-clipboard\"><\/i>","success":"<i class=\"fa fa-check\" style=\"color: #90BE6D\"><\/i>","error":"Press Ctrl+C to Copy"})</script>
+    <link href="Clase3_files/font-awesome-6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="Clase3_files/font-awesome-6.4.0/css/v4-shims.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Bioestadística en R - parte práctica clase 3, Módulo 2 : Estadística paramétrica y no paramétrica
+]
+.author[
+### Dra. Stephanie Hereira Pacheco
+]
+.institute[
+### CTCB, UATx
+]
+.date[
+### 09-05-2023
+]
+
+---
+
+
+
+
+
+
+
+
+.pull-left[
+![](https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/1617710_1048843451811700_2278987052727773097_o-1920x805.jpg)
+&lt;img src="https://ctbcuatx.edu.mx/wp-content/uploads/2020/07/uatx-logo.png" width="200px" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="https://pcb.ctbcuatx.edu.mx/wp-content/uploads/2020/07/PCBuwide-1024x426.jpg" width="500px" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="https://pbs.twimg.com/profile_images/1059608114805141504/SWOqgSmO_400x400.jpg" width="300px" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Contenido
+
++ Pruebas estadísticas
+    - ANOVA de 2 factores:
+        - ANOVA 2 factores fijos sin y con interacción
+        - ANOVA 2 factores de efectos aleatorios/mixtos
+        - ANOVA 2 factores anidados (diseño jerárquico)
+        - ANOVA 2 factores fijos parcelas divididas (split plot)
+    - Correlación lineal simple
+    - Regresión lineal simple
+   
+---
+
+
+class: center, middle
+
+## ANOVA 2 factores fijos sin interacción y con interacción
+
+Modelo aditivo, efectos fijos: aov(variable_respuesta \~ factor1 + factor2, data)
+
+Modelo con interacción: aov(variable_respuesta \~ factor1 x factor2, data)
+
+Modelo solo interacción: aov(variable_respuesta \~ factor1 : factor2, data)
+
+
+---
+### Ejemplo ANOVA 2 vías
+
+Para este ejemplo usaremos el set de datos 'ToothGrowth'
+
+
+```r
+data("ToothGrowth")
+dientes&lt;- ToothGrowth
+str(dientes)
+```
+
+```
+## 'data.frame':	60 obs. of  3 variables:
+##  $ len : num  4.2 11.5 7.3 5.8 6.4 10 11.2 11.2 5.2 7 ...
+##  $ supp: Factor w/ 2 levels "OJ","VC": 2 2 2 2 2 2 2 2 2 2 ...
+##  $ dose: num  0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+```
+
+Como podemos observar la variable de respuesta aquí sería la longitud de los dientes y los factores a evaluar son *'supp'* y *'dose'*, *supp* es la forma en que le dieron la vitamina C a los cerdos, si como OJ (jugo de naranja) o AS (ácido ascórbico) a diferentes dosis (*dose*) de 0.5, 1 y 2 mg/día.
+---
+### Ejemplo ANOVA 2 vías
+
+El factor 'dose' o dosis no aparece como factor sino como variable numérica.
+
+Esto puede ser un inconveniente al correr el ANOVA así que modificaremos esto en la data.
+
+
+
+```r
+dientes$dose &lt;- factor(dientes$dose, 
+                  levels = c(0.5, 1, 2),
+                  labels = c("D0.5", "D1", "D2"))
+head(dientes)
+```
+
+```
+##    len supp dose
+## 1  4.2   VC D0.5
+## 2 11.5   VC D0.5
+## 3  7.3   VC D0.5
+## 4  5.8   VC D0.5
+## 5  6.4   VC D0.5
+## 6 10.0   VC D0.5
+```
+
+---
+### Ejemplo ANOVA 2 vías
+
+Bien, visualizaremos nuestros datos para ver las tendencias de nuestros factores sobre nuestra variable de respuesta:
+
+&lt;img src="Clase3_files/figure-html/unnamed-chunk-6-1.png" width="45%" /&gt;&lt;img src="Clase3_files/figure-html/unnamed-chunk-6-2.png" width="45%" /&gt;
+
+---
+### Ejemplo ANOVA 2 vías
+
+.pull-left[
+
+```r
+ggboxplot(data = ToothGrowth, x = "dose", y = "len", fill = "supp")
+```
+
+&lt;img src="Clase3_files/figure-html/unnamed-chunk-7-1.png" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+ggline(ToothGrowth, x = "dose", y = "len", color = "supp", add = c("mean_se", "jitter"))
+```
+
+![](Clase3_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+]
+
+---
+### Ejemplo ANOVA 2 vías
+
+Como pudimos ver aparentemente los factores podrían tener una interacción, en este caso podríamos correr una ANOVA dos vías o bien aditivo o bien mutiplicativo si queremos confirmar la interacción, o bien solo ver la interacción.
+
+
+```r
+anova1&lt;- aov(len ~ supp + dose, data = dientes)
+anova2&lt;-  aov(len ~ supp * dose, data = dientes)
+anova3&lt;-  aov(len ~ supp : dose, data = dientes)
+```
+
+
+```r
+summary(anova1)
+```
+
+```
+##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## supp         1  205.4   205.4   14.02 0.000429 ***
+## dose         2 2426.4  1213.2   82.81  &lt; 2e-16 ***
+## Residuals   56  820.4    14.7                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+### Ejemplo ANOVA 2 vías
+
+
+```r
+summary(anova2)
+```
+
+```
+##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## supp         1  205.4   205.4  15.572 0.000231 ***
+## dose         2 2426.4  1213.2  92.000  &lt; 2e-16 ***
+## supp:dose    2  108.3    54.2   4.107 0.021860 *  
+## Residuals   54  712.1    13.2                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+
+```r
+summary(anova3)
+```
+
+```
+##             Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## supp:dose    5 2740.1   548.0   41.56 &lt;2e-16 ***
+## Residuals   54  712.1    13.2                   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+## ANOVA 2 factores de efectos aleatorios/mixtos
+
+
+```r
+library(faraway)
+data(rabbit)
+conejos&lt;- rabbit
+str(conejos)
+```
+
+```
+## 'data.frame':	30 obs. of  3 variables:
+##  $ treat: Factor w/ 6 levels "a","b","c","d",..: 6 2 3 3 1 2 3 6 4 1 ...
+##  $ gain : num  42.2 32.6 35.2 40.9 40.1 38.1 34.6 34.3 37.5 44.9 ...
+##  $ block: Factor w/ 10 levels "b1","b10","b2",..: 1 1 1 3 3 3 4 4 4 5 ...
+```
+
+---
+
+```r
+plot(gain~ block + treat, rabbit, col=456)
+```
+
+![](Clase3_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;![](Clase3_files/figure-html/unnamed-chunk-14-2.png)&lt;!-- --&gt;
+---
+.pull-left[
+
+```r
+#Observamos que tanto el bloque como el tratamiento son significativos.
+lm.rabbit &lt;- lm(gain~ block+treat, data=rabbit)
+anova(lm.rabbit)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Response: gain
+##           Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## block      9 730.39  81.154  8.0738 0.0002454 ***
+## treat      5 158.73  31.745  3.1583 0.0381655 *  
+## Residuals 15 150.77  10.052                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+.pull-right[
+
+```r
+# nos interesa analizar el efecto del factor (dieta) sobre la respuesta una vez que se haya tenido en cuenta la variabilidad atribuible al bloque (camada).
+library(nlme)
+lme.rabbit1 &lt;- lme(gain~ treat, random=~1|block, data=rabbit)
+anova(lme.rabbit1)
+```
+
+```
+##             numDF denDF  F-value p-value
+## (Intercept)     1    15 590.5297  &lt;.0001
+## treat           5    15   3.2818  0.0336
+```
+
+]
+---
+## ANOVA 2 factores anidados 
+
+
+```r
+df&lt;-data.frame(crecimiento = c (13, 16, 16, 12, 15, 16, 19, 16, 15, 15, 12, 15,
+                          19, 19, 20, 22, 23, 18, 16, 18, 19, 20, 21, 21,
+                          21, 23, 24, 22, 25, 20, 20, 22, 24, 22, 25, 26),
+                 fertilizante = factor(c(rep(c(' A ', ' B ', ' C '), each=12 ))),
+                 tech = factor(c(rep(1: 9,  each=4 ))))
+```
+
+
+```r
+str(df)
+```
+
+```
+## 'data.frame':	36 obs. of  3 variables:
+##  $ crecimiento : num  13 16 16 12 15 16 19 16 15 15 ...
+##  $ fertilizante: Factor w/ 3 levels " A "," B "," C ": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ tech        : Factor w/ 9 levels "1","2","3","4",..: 1 1 1 1 2 2 2 2 3 3 ...
+```
+
+---
+
+
+```r
+summary(aov(crecimiento ~ fertilizante/tech, data = df))
+```
+
+```
+##                   Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## fertilizante       2  372.7  186.33  53.238 4.27e-10 ***
+## fertilizante:tech  6   31.8    5.31   1.516    0.211    
+## Residuals         27   94.5    3.50                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+
+```r
+summary(aov(crecimiento ~ fertilizante %in% tech, data = df))
+```
+
+```
+##                   Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## fertilizante:tech  8  404.5   50.56   14.45 6.06e-08 ***
+## Residuals         27   94.5    3.50                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+## ANOVA 2 factores fijos parcelas divididas (split plot)
+
+En este experimento, se desean medir los efectos de tres factores sobre la cantidad de glucógeno en el hígado de ratas. En este experimento, hay 6 ratas (parcelas o plots). 
+A cada rata, se le asignó al azar una de las tres dietas alimentarias (T1, T2 y T3).
+De cada rata, se le extrajo el hígado y se dividió en cuatro segmentos. Cada segmento se preparó utilizando uno de dos productos químicos diferentes (P1 y P2). Finalmente, se midió el nivel de glucógeno de cada pedazo de hígado usando dos técnicas analíticas diferentes (A y B). La unidad experimental de la dieta es la rata. La unidad experimental para la preparación química del hígado es una tira de hígado. La unidad experimental de la técnica analítica es un trozo de hígado. Todos son diferentes.
+
+---
+## ANOVA 2 factores fijos parcelas divididas (split plot)
+
+
+```r
+ratas&lt;- readr::read_csv("https://raw.githubusercontent.com/Steph0522/Curso_Bioestadistica_2023/main/Modulo2/data_ratas.csv")
+str(ratas)
+```
+
+```
+## spc_tbl_ [48 × 5] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ glycogen: num [1:48] 127 126 127 121 124 125 132 138 146 144 ...
+##  $ food    : chr [1:48] "T1" "T1" "T1" "T1" ...
+##  $ rat     : chr [1:48] "Remy" "Remy" "Remy" "Remy" ...
+##  $ prep    : chr [1:48] "P1" "P1" "P2" "P2" ...
+##  $ method  : chr [1:48] "A" "B" "A" "B" ...
+##  - attr(*, "spec")=
+##   .. cols(
+##   ..   glycogen = col_double(),
+##   ..   food = col_character(),
+##   ..   rat = col_character(),
+##   ..   prep = col_character(),
+##   ..   method = col_character()
+##   .. )
+##  - attr(*, "problems")=&lt;externalptr&gt;
+```
+---
+## ANOVA 2 factores fijos parcelas divididas (split plot)
+
+
+```r
+anova_factorial &lt;- lm(glycogen ~ food * prep * method, data = ratas)
+anova(anova_factorial)
+```
+
+```
+## Analysis of Variance Table
+## 
+## Response: glycogen
+##                  Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## food              2 3530.0 1765.02 32.2583 9.401e-09 ***
+## prep              1   35.0   35.02  0.6401    0.4289    
+## method            1   54.2   54.19  0.9904    0.3263    
+## food:prep         2  133.3   66.65  1.2180    0.3077    
+## food:method       2    5.4    2.69  0.0491    0.9521    
+## prep:method       1   11.0   11.02  0.2014    0.6563    
+## food:prep:method  2    5.3    2.65  0.0484    0.9529    
+## Residuals        36 1969.7   54.72                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+---
+
+```r
+anova_split &lt;- aov(glycogen ~ food * prep * method + Error(rat/food:prep), data = ratas)
+summary(anova_split)
+```
+
+```
+## 
+## Error: rat
+##           Df Sum Sq Mean Sq F value Pr(&gt;F)  
+## food       2   3530  1765.0    6.22 0.0856 .
+## Residuals  3    851   283.8                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Error: rat:food:prep
+##           Df Sum Sq Mean Sq F value Pr(&gt;F)
+## prep       1   35.0   35.02   0.269  0.640
+## food:prep  2  133.3   66.65   0.513  0.643
+## Residuals  3  390.1  130.02               
+## 
+## Error: Within
+##                  Df Sum Sq Mean Sq F value Pr(&gt;F)
+## method            1   54.2   54.19   2.232  0.146
+## food:method       2    5.4    2.69   0.111  0.896
+## prep:method       1   11.0   11.02   0.454  0.506
+## food:prep:method  2    5.3    2.65   0.109  0.897
+## Residuals        30  728.4   24.28
+```
+
+
+---
+# Correlación lineal simple
+
+```r
+data(iris)
+flores&lt;- iris
+str(flores)
+```
+
+```
+## 'data.frame':	150 obs. of  5 variables:
+##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
+##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
+##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
+##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
+```
+
+```r
+cols&lt;- c("Largo_Sepalo", "Ancho_Sepalo", "Largo_Petalo", 
+         "Ancho_Petalo", "Especies")
+colnames(flores)&lt;- cols
+```
+
+---
+## Ejemplo
+
+Queremos saber si existe una relación entre el largo y el ancho del pétalo de estas flores sin importar la especie:
+
+
+```r
+cor.test(flores$Largo_Petalo, flores$Ancho_Petalo)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  flores$Largo_Petalo and flores$Ancho_Petalo
+## t = 43.387, df = 148, p-value &lt; 2.2e-16
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.9490525 0.9729853
+## sample estimates:
+##       cor 
+## 0.9628654
+```
+---
+## Correlación 
+
+-   Los valores que más nos interesan aquí son el *cor* y el *p-value*:
+
+-   Para un valor de cor de +1 quiere decir que dos variables están perfectamente correlacionadas positivamente. Es decir, al aumentar una, aumenta la otra.
+
+-   Un valor de -1 significa que las dos variables están perfectamente relacionadas negativamente, es decir, mientras una aumenta, la otra disminuye en la misma medida.
+
+-   Un valor 0 significa que no hay correlación en las dos variables.
+
+-   El valor p es la probabilidad de obtener un valor de cor más extremo que el cor observado, dado los grados de libertad y si cor fuera 0. Igualmente valores menores a 0.05 son significativos.
+
+
+---
+
+## Correlación lineal simple
+
+Hay otra función que nos permite obtener solo el coeficiente de correlación, de manera más práctica:
+
+
+```r
+#datos normales (correlación pearson)
+cor(flores$Largo_Petalo, flores$Ancho_Petalo)    
+```
+
+```
+## [1] 0.9628654
+```
+
+```r
+#datos no normales (correlación spearman)
+cor(flores$Largo_Petalo, flores$Ancho_Petalo, method = "spearman")
+```
+
+```
+## [1] 0.9376668
+```
+
+---
+
+## Regresión lineal simple
+
+Ahora bien, ya sabemos que estas dos variables están correlacionadas positivamente, así que si quiero construir un modelo que permite predecir valores en base a otros no medidos podemos aplicar una ***regresión lineal.***
+
+Una regresión lineal es un modelo lineal que describe la ecuación de dos variables de interés definidas en una función lineal: y = ax + b,
+
+donde a es la pendiente y b el intercepto.
+
+La regresión lineal debe aplicarse sobre **datos normales**. Así que verifiquemos la normalidad.
+---
+## Regresión lineal simple
+
+Primero, construimos el modelo y luego graficamos.
+
+
+```r
+modelo &lt;- lm(Ancho_Petalo ~ Largo_Petalo, data = flores) 
+plot(modelo, which = 2)
+```
+
+&lt;img src="Clase3_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+Exploremos el modelo:
+
+
+```r
+summary(modelo)
+```
+
+```
+## 
+## Call:
+## lm(formula = Ancho_Petalo ~ Largo_Petalo, data = flores)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.56515 -0.12358 -0.01898  0.13288  0.64272 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -0.363076   0.039762  -9.131  4.7e-16 ***
+## Largo_Petalo  0.415755   0.009582  43.387  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.2065 on 148 degrees of freedom
+## Multiple R-squared:  0.9271,	Adjusted R-squared:  0.9266 
+## F-statistic:  1882 on 1 and 148 DF,  p-value: &lt; 2.2e-16
+```
+---
+## Regresión lineal simple
+
+Con *summary()* podemos ver los coeficientes de la ecuación, en este caso son: para el intercepto -0.36 y para la pendiente es 0.41. De nuevo los valores p están por debajo de 0.05. Así que la ecuación queda -\&gt; Ancho_Petalo = Largo_Petalo\*0.4157 - 0.3630
+
+Otro resultado importante es el R cuadrado que nos dice la bondad del ajuste del modelo, esto es la fracción de mis datos que es explicado por el modelo en este caso si miramos el valor ajustado, el modelo explica el 92% de mis datos.
+
+---
+class: inverse, center, middle
+
+# MUCHAS GRACIAS.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

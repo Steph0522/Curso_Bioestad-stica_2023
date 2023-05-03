@@ -1,0 +1,264 @@
+---
+title: "Bioestadística en R - parte práctica clase 1, Módulo 2 : Estadística paramétrica y no paramétrica"
+author: "Ph D. Stephanie Hereira Pacheco"
+output:
+  pdf_document:
+    keep_tex: yes
+    includes:
+      in_header: header2.tex
+    toc: true
+    toc_depth: 3
+  html_document: default
+editor_options: 
+  markdown: 
+    wrap: sentence
+bibliography: references.bib
+---
+
+# Parte 2
+
+El propósito de este cuadernillo es aplicar el cálculo u obtención de algunos conocimientos teóricos impartidos en la clase 3 en el módulo II del curso de Bioestadística en R.
+
+
+### ANOVA 2 factores fijos sin interacción y con interacción
+
+Modelo aditivo, efectos fijos: aov(variable_respuesta \~ factor1 + factor2, data)
+
+Modelo con interacción: aov(variable_respuesta \~ factor1 x factor2, data)
+
+Modelo solo interacción: aov(variable_respuesta \~ factor1 : factor2, data)
+
+
+
+#### Ejemplo ANOVA 2 vías
+
+Para este ejemplo usaremos el set de datos 'ToothGrowth'
+
+```{r}
+data("ToothGrowth")
+dientes<- ToothGrowth
+str(dientes)
+```
+
+Como podemos observar la variable de respuesta aquí sería la longitud de los dientes y los factores a evaluar son *'supp'* y *'dose'*, *supp* es la forma en que le dieron la vitamina C a los cerdos, si como OJ (jugo de naranja) o AS (ácido ascórbico) a diferentes dosis (*dose*) de 0.5, 1 y 2 mg/día.
+
+
+El factor 'dose' o dosis no aparece como factor sino como variable numérica.
+
+\newpage
+
+Esto puede ser un inconveniente al correr el ANOVA así que modificaremos esto en la data.
+
+
+```{r}
+dientes$dose <- factor(dientes$dose, 
+                  levels = c(0.5, 1, 2),
+                  labels = c("D0.5", "D1", "D2"))
+head(dientes)
+
+```
+
+
+
+Bien, visualizaremos nuestros datos para ver las tendencias de nuestros factores sobre nuestra variable de respuesta:
+
+```{r, message=FALSE, warning=FALSE, out.width="45%", echo=FALSE}
+library(ggpubr)
+ggboxplot(data = ToothGrowth, x = "supp", y = "len", fill = "supp")+theme(text = element_text(size = 40))
+ggboxplot(data = ToothGrowth, x = "dose", y = "len", fill = "dose")+theme(text = element_text(size = 40))
+```
+
+
+
+
+```{r, echo=TRUE, out.width="80%", fig.align='center'}
+ggboxplot(data = ToothGrowth, x = "dose", y = "len", fill = "supp")
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, echo=TRUE, out.width="80%"}
+ggline(ToothGrowth, x = "dose", y = "len", color = "supp", add = c("mean_se", "jitter"))
+```
+
+
+
+Como pudimos ver aparentemente los factores podrían tener una interacción, en este caso podríamos correr una ANOVA dos vías o bien aditivo o bien mutiplicativo si queremos confirmar la interacción, o bien solo ver la interacción.
+
+```{r}
+anova1<- aov(len ~ supp + dose, data = dientes)
+anova2<-  aov(len ~ supp * dose, data = dientes)
+anova3<-  aov(len ~ supp : dose, data = dientes)
+
+```
+
+```{r}
+summary(anova1)
+```
+
+
+
+```{r}
+summary(anova2)
+```
+
+
+```{r}
+summary(anova3)
+```
+
+
+### ANOVA 2 factores de efectos aleatorios/mixtos
+
+```{r, message=FALSE, warning=FALSE}
+library(faraway)
+data(rabbit)
+conejos<- rabbit
+str(conejos)
+```
+
+
+```{r, out.width="45%"}
+plot(gain~ block + treat, rabbit, col=456)
+```
+
+```{r}
+#Observamos que tanto el bloque como el tratamiento son significativos.
+lm.rabbit <- lm(gain~ block+treat, data=rabbit)
+anova(lm.rabbit)
+```
+
+```{r}
+# nos interesa analizar el efecto del factor (dieta) sobre la respuesta una vez que se haya tenido en cuenta la variabilidad atribuible al bloque (camada).
+library(nlme)
+lme.rabbit1 <- lme(gain~ treat, random=~1|block, data=rabbit)
+anova(lme.rabbit1)
+```
+
+
+### ANOVA 2 factores anidados 
+
+```{r}
+df<-data.frame(crecimiento = c (13, 16, 16, 12, 15, 16, 19, 16, 15, 15, 12, 15,
+                          19, 19, 20, 22, 23, 18, 16, 18, 19, 20, 21, 21,
+                          21, 23, 24, 22, 25, 20, 20, 22, 24, 22, 25, 26),
+                 fertilizante = factor(c(rep(c(' A ', ' B ', ' C '), each=12 ))),
+                 tech = factor(c(rep(1: 9,  each=4 ))))
+```
+
+```{r}
+str(df)
+```
+
+
+
+```{r}
+summary(aov(crecimiento ~ fertilizante/tech, data = df))
+```
+
+```{r}
+summary(aov(crecimiento ~ fertilizante %in% tech, data = df))
+```
+
+### ANOVA 2 factores fijos parcelas divididas (split plot)
+
+En este experimento, se desean medir los efectos de tres factores sobre la cantidad de glucógeno en el hígado de ratas. En este experimento, hay 6 ratas (parcelas o plots). 
+A cada rata, se le asignó al azar una de las tres dietas alimentarias (T1, T2 y T3).
+De cada rata, se le extrajo el hígado y se dividió en cuatro segmentos. Cada segmento se preparó utilizando uno de dos productos químicos diferentes (P1 y P2). Finalmente, se midió el nivel de glucógeno de cada pedazo de hígado usando dos técnicas analíticas diferentes (A y B). La unidad experimental de la dieta es la rata. La unidad experimental para la preparación química del hígado es una tira de hígado. La unidad experimental de la técnica analítica es un trozo de hígado. Todos son diferentes.
+
+
+
+```{r, warning=FALSE, message=FALSE}
+ratas<- readr::read_csv("https://raw.githubusercontent.com/Steph0522/Curso_Bioestadistica_2023/main/Modulo2/data_ratas.csv")
+str(ratas)
+
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+anova_factorial <- lm(glycogen ~ food * prep * method, data = ratas)
+anova(anova_factorial)
+```
+
+```{r, warning=FALSE, message=FALSE}
+anova_split <- aov(glycogen ~ food * prep * method + Error(rat/food:prep), data = ratas)
+summary(anova_split)
+```
+
+
+
+### Correlación lineal simple
+```{r, warning=FALSE, message=FALSE}
+data(iris)
+flores<- iris
+str(flores)
+cols<- c("Largo_Sepalo", "Ancho_Sepalo", "Largo_Petalo", 
+         "Ancho_Petalo", "Especies")
+colnames(flores)<- cols
+```
+
+
+#### Ejemplo
+
+Queremos saber si existe una relación entre el largo y el ancho del pétalo de estas flores sin importar la especie:
+
+```{r}
+cor.test(flores$Largo_Petalo, flores$Ancho_Petalo)
+```
+
+#### Correlación 
+
+-   Los valores que más nos interesan aquí son el *cor* y el *p-value*:
+
+-   Para un valor de cor de +1 quiere decir que dos variables están perfectamente correlacionadas positivamente. Es decir, al aumentar una, aumenta la otra.
+
+-   Un valor de -1 significa que las dos variables están perfectamente relacionadas negativamente, es decir, mientras una aumenta, la otra disminuye en la misma medida.
+
+-   Un valor 0 significa que no hay correlación en las dos variables.
+
+-   El valor p es la probabilidad de obtener un valor de cor más extremo que el cor observado, dado los grados de libertad y si cor fuera 0. Igualmente valores menores a 0.05 son significativos.
+
+
+
+Hay otra función que nos permite obtener solo el coeficiente de correlación, de manera más práctica:
+
+```{r}
+#datos normales (correlación pearson)
+cor(flores$Largo_Petalo, flores$Ancho_Petalo)    
+
+#datos no normales (correlación spearman)
+cor(flores$Largo_Petalo, flores$Ancho_Petalo, method = "spearman")
+```
+
+
+
+### Regresión lineal simple
+
+Ahora bien, ya sabemos que estas dos variables están correlacionadas positivamente, así que si quiero construir un modelo que permite predecir valores en base a otros no medidos podemos aplicar una ***regresión lineal.***
+
+Una regresión lineal es un modelo lineal que describe la ecuación de dos variables de interés definidas en una función lineal: y = ax + b,
+
+donde a es la pendiente y b el intercepto.
+
+La regresión lineal debe aplicarse sobre **datos normales**. Así que verifiquemos la normalidad.
+
+
+Primero, construimos el modelo y luego graficamos.
+
+```{r,  out.width="80%", fig.align='center'}
+modelo <- lm(Ancho_Petalo ~ Largo_Petalo, data = flores) 
+plot(modelo, which = 2)
+```
+
+
+Exploremos el modelo:
+
+```{r}
+summary(modelo)
+```
+
+
+Con *summary()* podemos ver los coeficientes de la ecuación, en este caso son: para el intercepto -0.36 y para la pendiente es 0.41. De nuevo los valores p están por debajo de 0.05. Así que la ecuación queda -\> Ancho_Petalo = Largo_Petalo\*0.4157 - 0.3630
+
+Otro resultado importante es el R cuadrado que nos dice la bondad del ajuste del modelo, esto es la fracción de mis datos que es explicado por el modelo en este caso si miramos el valor ajustado, el modelo explica el 92% de mis datos.
+

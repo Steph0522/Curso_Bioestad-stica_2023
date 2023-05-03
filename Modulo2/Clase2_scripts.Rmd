@@ -1,0 +1,249 @@
+---
+title: "Bioestadística en R - parte práctica clase 1, Módulo 2 : Estadística paramétrica y no paramétrica"
+author: "Ph D. Stephanie Hereira Pacheco"
+output:
+  pdf_document:
+    keep_tex: yes
+    includes:
+      in_header: header2.tex
+    toc: true
+    toc_depth: 3
+  html_document: default
+editor_options: 
+  markdown: 
+    wrap: sentence
+bibliography: references.bib
+---
+# Parte 2
+
+El propósito de este cuadernillo es aplicar el cálculo u obtención de algunos conocimientos teóricos impartidos en la clase 2 en el módulo II del curso de Bioestadística en R.
+
+## 1 variable cuantitativa, 2 grupos emparejados: t test pareada 
+
+- Data ejemplo:
+```{r}
+datos_ejemplo<- data.frame(Pan=1:10,
+                         Temp_pre=c(20.83,19.72,19.64,20.09,22.25,
+                                   20.83,21.31,22.50,21.17,19.57),
+                         Temp_post=c(100.87,98.58,109.09,121.83,122.78,
+                                     111.41,103.96,121.81,127.85,115.17))
+
+datos_ejemplo$Diferencia<- datos_ejemplo$Temp_post - datos_ejemplo$Temp_pre
+
+datos_ejemplo$Diferencia
+
+```
+
+
+```{r, echo=FALSE}
+knitr::kable(datos_ejemplo, align = "c")
+```
+
+
+
+```{r, warning=FALSE, message=FALSE}
+shapiro.test(datos_ejemplo$Diferencia)
+```
+
+```{r}
+t.test(datos_ejemplo$Temp_post, datos_ejemplo$Temp_pre, alternative = "greater", paired = TRUE)
+```
+
+
+## 1 variable cuantitativa, 2 grupos emparejados: Wilcoxon
+
+```{r}
+datos_ejemplo2<- data.frame(Observ=c(1:11),
+                    Antes=c(1,8,0,0,1,3,3,3,5,6,5),
+                    Después=c(3,5,-2,-1,1,-5,-7,-362,-1,0,-10))
+
+datos_ejemplo2$Diferencia<- datos_ejemplo2$Antes-datos_ejemplo2$Después
+
+datos_ejemplo2$Diferencia
+```
+
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+knitr::kable(datos_ejemplo2, align = "c")%>% 
+  kableExtra::kable_paper(full_width = F)
+```
+
+
+```{r}
+shapiro.test(datos_ejemplo2$Diferencia)
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+wilcox.test(datos_ejemplo2$Antes, datos_ejemplo2$Después, paired = TRUE)
+```
+
+## 1 variable cuantitativa >2 grupos independientes: ANOVA 1 vía 
+
+```{r}
+datos<- PlantGrowth
+str(datos)
+```
+
+```{r}
+modelo<- lm(weight~group, data = datos)
+```
+
+### Probando supuestos
+```{r, fig.align='center', fig.height=6.5}
+par(mfrow = c(2, 2))
+plot(modelo)
+```
+
+### Anova 1 vía
+```{r}
+anova_R<- aov(modelo)
+summary(anova_R)    
+```
+
+
+## 1 variable cuantitativa y >2 grupos independientes: Kruskal Wallis
+
+```{r}
+datos2 <- data.frame(
+  dieta = c(rep("dieta1", 18), rep("dieta2", 18), rep("dieta3", 18)),
+  n_huevos = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 27, 28, 29, 30, 51, 52, 53, 342, 40,
+               41, 42, 43, 44, 45, 46, 47, 48, 67, 88, 89, 90, 91,92, 93, 94, 293,
+               19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 25, 36, 37, 58, 59, 60, 71, 72)
+)
+str(datos2)
+modelo2<- lm(n_huevos~dieta, data = datos2)
+```
+
+
+### Probando supuestos
+
+```{r, fig.align='center', fig.height=6.5}
+par(mfrow = c(2, 2))
+plot(modelo2)
+```
+
+### Kruskal- Wallis test
+```{r, fig.align='center', fig.height=6.5}
+ kruskal.test(n_huevos ~ dieta, data = datos2)
+```
+
+
+## 1 variable cuantitativa >2 grupos dependientes: ANOVA por bloques 
+```{r}
+library(BHH2)
+data(penicillin.data)
+penicilina<- penicillin.data
+str(penicilina)
+```
+
+```{r}
+plot(yield~blend+treat, data = penicilina)
+```
+
+```{r}
+modelo3<- lm(yield~blend+treat, data = penicilina)
+```
+
+```{r, fig.align='center'}
+par(mfrow = c(2, 2))
+plot(modelo3)
+```
+
+
+### Anova por bloques
+
+```{r}
+anova(lm(yield~ blend+treat,data = penicilina))
+```
+
+
+### Friedman test
+
+```{r}
+friedman.test(yield~ blend|treat,data = penicilina)
+```
+
+
+## Comparaciones múltiples
+
+```{r}
+summary(anova_R)
+```
+
+### Pruebas pareadas (t.test) con correcciones
+
+- Bonferroni, Holm-Bonferroni, FDR, entre otras.
+
+
+```{r}
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "holm")
+```
+
+
+```{r}
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "bonferroni")
+```
+
+
+```{r}
+pairwise.t.test(datos$weight, g = datos$group, p.adjust.method = "BH")
+
+```
+
+
+### Comparaciones múltiples: Tukey HSD
+```{r}
+TukeyHSD(anova_R, ordered = TRUE)
+```
+
+```{r, fig.align='center'}
+plot(TukeyHSD(anova_R, ordered = TRUE))
+```
+
+
+```{r}
+agricolae::HSD.test(anova_R, "group", group = TRUE, console = TRUE)
+```
+
+```{r, fig.align='center'}
+plot(agricolae::HSD.test(anova_R, "group", group = TRUE))
+```
+
+```{r, fig.align='center', warning=FALSE, message=FALSE, fig.height=5}
+library(ggplot2)
+library(ggpubr)
+comparaciones<-  list( c("ctrl", "trt1"), c("trt1", "trt2"), c("ctrl", "trt2") )
+t_test<- compare_means(weight ~ group, comparisons = comparaciones, p.adjust.method = "bonferroni", method='t.test', data = datos)
+datos %>% ggbarplot(x = "group", y = "weight", fill = "group", add = "mean_sd")+
+  stat_compare_means(method = "aov", label.y = 9) +
+  stat_pvalue_manual(t_test, label = "p.adj", 
+    y.position = c(7, 7.7, 8.3))
+```
+
+```{r, fig.align='center', warning=FALSE, message=FALSE, fig.height=6}
+datos %>% ggbarplot(x = "group", y = "weight", fill = "group", add = "mean_sd")+
+  stat_compare_means(method = "aov")+ annotate(geom = "text",     
+           label = c("a", "c", "b"),   
+           x = c("ctrl", "trt1", "trt2"),            
+           y = c(5.032+1, 4.661+1, 5.526+1),   
+           size = 5, fontface = "bold")
+```
+
+
+
+### Comparaciones múltiples: Wilcoxon/U Mann Withney
+```{r, warning=FALSE, message=FALSE}
+pairwise.wilcox.test(datos2$n_huevos, datos2$dieta, p.adjust.method = "bonf")
+```
+
+
+```{r, fig.align='center', warning=FALSE, message=FALSE, fig.height=6}
+comparaciones<-  list( c("dieta1", "dieta2"), c("dieta2", "dieta3"), c("dieta1", "dieta3") )
+datos2 %>% ggboxplot(x = "dieta", y = "n_huevos", fill = "dieta")+
+  stat_compare_means(label.y = 500)+
+  stat_compare_means(comparisons = comparaciones)
+```
+
+
