@@ -1,0 +1,49 @@
+ glycogen,food,      rat, prep,method
+127,  T1,     Remy,   P1,     A
+126,  T1,     Remy,   P1,     B
+127,  T1,     Remy,   P2,     A
+121,  T1,     Remy,   P2,     B
+124,  T1,     Remy,   P1,     A
+125,  T1,     Remy,   P1,     B
+132,  T1,     Remy,   P2,     A
+138,  T1,     Remy,   P2,     B
+146,  T1,Templeton,   P1,     A
+144,  T1,Templeton,   P1,     B
+136,  T1,Templeton,   P2,     A
+139,  T1,Templeton,   P2,     B
+156,  T1,Templeton,   P1,     A
+146,  T1,Templeton,   P1,     B
+134,  T1,Templeton,   P2,     A
+133,  T1,Templeton,   P2,     B
+157,  T2, Scabbers,   P1,     A
+145,  T2, Scabbers,   P1,     B
+154,  T2, Scabbers,   P2,     A
+142,  T2, Scabbers,   P2,     B
+147,  T2, Scabbers,   P1,     A
+153,  T2, Scabbers,   P1,     B
+155,  T2, Scabbers,   P2,     A
+157,  T2, Scabbers,   P2,     B
+151,  T2, Splinter,   P1,     A
+155,  T2, Splinter,   P1,     B
+147,  T2, Splinter,   P2,     A
+147,  T2, Splinter,   P2,     B
+162,  T2, Splinter,   P1,     A
+152,  T2, Splinter,   P1,     B
+145,  T2, Splinter,   P2,     A
+144,  T2, Splinter,   P2,     B
+130,  T3,Nicodemus,   P1,     A
+121,  T3,Nicodemus,   P1,     B
+134,  T3,Nicodemus,   P2,     A
+134,  T3,Nicodemus,   P2,     B
+131,  T3,Nicodemus,   P1,     A
+132,  T3,Nicodemus,   P1,     B
+128,  T3,Nicodemus,   P2,     A
+127,  T3,Nicodemus,   P2,     B
+134,  T3,    Rizzo,   P1,     A
+136,  T3,    Rizzo,   P1,     B
+135,  T3,    Rizzo,   P2,     A
+134,  T3,    Rizzo,   P2,     B
+130,  T3,    Rizzo,   P1,     A
+123,  T3,    Rizzo,   P1,     B
+136,  T3,    Rizzo,   P2,     A
+133,  T3,    Rizzo,   P2,     B
