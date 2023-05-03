@@ -2,7 +2,7 @@
 title: "Bioestadística en R - parte práctica clase 3, Módulo 2 : Estadística paramétrica y no paramétrica"
 author: "Dra. Stephanie Hereira Pacheco"
 institute: "CTCB, UATx"
-date: "09-05-2023"
+date: "10-05-2023"
 output:
   xaringan::moon_reader:
     css: xaringan-themer.css

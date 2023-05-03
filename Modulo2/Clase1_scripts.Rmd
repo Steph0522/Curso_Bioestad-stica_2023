@@ -1,0 +1,318 @@
+---
+title: "Bioestadística en R - parte práctica clase 1, Módulo 2 : Estadística paramétrica y no paramétrica"
+author: "Ph D. Stephanie Hereira Pacheco"
+output:
+  pdf_document:
+    keep_tex: yes
+    includes:
+      in_header: header.tex
+    toc: true
+    toc_depth: 3
+  html_document: default
+editor_options: 
+  markdown: 
+    wrap: sentence
+bibliography: references.bib
+---
+
+# Parte 2
+
+El propósito de este cuadernillo es aplicar el cálculo u obtención de algunos conocimientos teóricos impartidos en la clase 1 en el módulo II del curso de Bioestadística en R.
+
+
+## Pruebas paramétricas
+
+Supuestos:
+
+- Distribución conocida (**normal**).
+
+- Homocedasticidad.
+
+- Otros: tamaño de la muestra, variables cuantitativas o continuas, outliers, aleatoriedad, independencia de las observaciones, linealidad. 
+
+
+### Explorando la data
+
+```{r, message=FALSE, warning=FALSE}
+data("PlantGrowth")
+datos <- PlantGrowth
+str(datos)
+head(datos)
+```
+
+
+### Distribución normal: métodos gráficos
+
+```{r, echo=TRUE, fig.height=5}
+library(ggpubr)
+ggdensity(datos$weight) 
+```
+
+```{r, fig.align='center', fig.height=6}
+library(car)
+car::qqPlot(datos$weight)
+```
+
+### Modelo lineal
+```{r, eval=TRUE}
+modelo <- lm(weight ~ group, data = datos)
+summary(modelo)
+```
+
+
+
+```{r, echo=TRUE, fig.height=6}
+plot(modelo, which = 2)
+```
+
+
+```{r, fig.height=6}
+hist(modelo$residuals)
+```
+
+
+### Distribución normal: métodos numéricos
+
+
+```{r, fig.align='center', fig.height=6, message=FALSE, warning=FALSE}
+shapiro.test(datos$weight)
+shapiro.test(modelo$residuals)
+```
+
+
+```{r, fig.align='center', fig.height=6, eval=FALSE}
+
+ctrl<- datos %>% filter(group=="ctrl")
+tr1<- datos %>% filter(group=="trt1")
+tr2<- datos %>% filter(group=="trt2")
+
+ro1<- ctrl$weight - tr1$weight
+ro2<- ctrl$weight-tr2$weight
+ro3<- tr1$weight-tr2$weight
+
+shapiro.test(c(ro1,ro2,ro3))
+```
+
+### Otras pruebas
+
+```{r}
+library(nortest)
+ad.test(datos$weight)
+cvm.test(datos$weight)
+```
+
+```{r}
+lillie.test(datos$weight)
+pearson.test(datos$weight)
+```
+
+
+```{r, echo=FALSE}
+data("ToothGrowth")
+data("iris")
+```
+
+
+```{r, fig.align='center', fig.height=5,fig.width=4, message=FALSE, warning=FALSE}
+data("ToothGrowth")
+boxplot(len ~ supp, data=ToothGrowth, col=c("red", "blue"), main="Dientes")
+```
+
+
+
+```{r, fig.align='center', fig.height=5,fig.width=4, message=FALSE, warning=FALSE}
+data("iris")
+boxplot(Petal.Width ~ Species, data=iris, col=c("pink", "purple", "cyan"), main="Flores")
+```
+
+
+.pull-left[
+```{r, fig.align='center', fig.height=5,fig.width=4, message=FALSE, warning=FALSE}
+aggregate(len ~ supp, data = ToothGrowth, var)
+```
+Ratio
+```{r}
+68.32 /  43.63
+```
+
+```{r, fig.align='center', fig.height=5,fig.width=4, message=FALSE, warning=FALSE}
+aggregate(Petal.Width ~ Species, data = iris, var)
+
+```
+
+Ratio
+```{r}
+r1<-0.03910612 / 0.01110612 #versicolor vs setosa
+r2<-0.07543265 / 0.01110612 #virginca vs setosa
+r3<-0.07543264 / 0.03910612 #virginica vs versicolor
+cbind(r1,r2,r3)
+```
+
+### Probando heterocedasticidad
+
+```{r, fig.align='center', fig.height=5,fig.width=8, message=FALSE, warning=FALSE}
+m1<-lm(len ~ supp, data=ToothGrowth)
+par(mfrow = c(1, 2))
+plot(m1, which=c(1,3))
+```
+
+
+
+```{r, fig.align='center', fig.height=5,fig.width=8, message=FALSE, warning=FALSE}
+m2<-lm(Petal.Width ~ Species, data=iris)
+par(mfrow = c(1, 2))
+plot(m2, which=c(1,3))
+```
+
+
+
+
+```{r, fig.align='center', fig.height=5,fig.width=8, message=FALSE, warning=FALSE}
+
+var.test(len ~ supp, data = ToothGrowth) 
+
+```
+
+
+```{r, fig.align='center', fig.height=5,fig.width=8, message=FALSE, warning=FALSE}
+lmtest::bptest(m2) #sobre un modelo
+
+```
+
+
+### Otras pruebas
+
+
+```{r}
+GAD::C.test(m2)
+```
+
+
+```{r}
+car::leveneTest(m2)
+```
+---
+
+## Tablas de contingencia
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+iris %>% glimpse()
+```
+
+Vamos a categorizar la variable *Largo del Sépalo* de **iris**, haciendo 'pequeño' las valores que estén por debajo de la mediana y 'grande' los que estén por encima de la mediana.
+
+```{r}
+iris$size_sepal <- ifelse(iris$Sepal.Length < median(
+  iris$Sepal.Length), "pequeño", "grande")
+```
+
+Luego construiremos una tabla de contingencia a partir de esto:
+```{r}
+tabla_contingencia<-table(iris$Species, iris$size_sepal)
+tabla_contingencia
+```
+
+
+Gráficamente se ve así:
+```{r, fig.height=6, fig.align='center', echo=FALSE}
+library(ggplot2)
+
+ggplot(iris) +
+  aes(x = Species, fill = size_sepal) +
+  geom_bar()+ theme(text = element_text(size = 18))
+```
+
+Queremos saber si la especie tiene un efecto sobre el largo del sépalo (variable categorizada).
+
+
+### Prueba de Fisher
+
+```{r}
+fisher.test(tabla_contingencia)
+```
+
+### Prueba de Chi-cuadrado 
+```{r}
+chisq.test(tabla_contingencia)
+```
+]
+
+Así que rechazamos la hipótesis nula para la prueba de independencia Chi-cuadrado y de Fisher, esto significa que existe una relación y/o diferencia significativa entre la especie y el tamaño del sépalo.
+
+## Pruebas estadísticas: 1 variable cuantitativa y 2 grupos independientes:
+
+- t test (paramétrica)
+
+- U de Mann-Whitney (no paramétrica)
+
+
+### Ejemplo de una muestra
+
+
+```{r, warning=FALSE, message=FALSE}
+data<- data.frame(Congelador=1:10,
+                  Temperatura=c(-2.14,-0.8,
+                                -2.75,-2.58,   
+                                -2.26,-2.46,
+                                -1.33,-2.85,
+                                -0.93,-2.01))
+shapiro.test(data$Temperatura)
+```
+
+
+```{r}
+t.test(data$Temperatura, mu = 0, alternative = "less")
+```
+
+
+### t de Student para dos grupos: Ejemplo 
+```{r}
+freidora<- data.frame(
+  Oster1=c(4.72,7.40,3.50,3.85,4.47,
+           4.09,6.34,3.30,7.13,4.99),
+  Oster2=c(9.19,11.44,9.64,12.09,10.80,
+           12.71,10.04,9.06,6.31,9.44))
+ro1<- freidora$Oster1-mean(freidora$Oster1)
+ro2<- freidora$Oster2-mean(freidora$Oster2)
+
+shapiro.test(c(ro1,ro2))
+```
+
+
+```{r, echo=FALSE}
+knitr::kable(freidora, align = "c", format = "pipe", padding = 0)
+```
+
+### t de Student para dos grupos: Ejemplo 
+
+
+```{r}
+t.test(freidora$Oster1, freidora$Oster2, mu=0, paired=FALSE, alternative="two.sided", var.equal=TRUE)
+```
+
+
+
+### Prueba de Welch
+
+Para los casos donde no se cumplen que las varianzas sean iguales u homogéneas.
+
+```{r}
+t.test(freidora$Oster1, freidora$Oster2, mu=0, paired=FALSE, alternative="two.sided", var.equal=FALSE)
+```
+
+### U Mann Whitney - Ejemplo
+```{r}
+data_u<- data.frame(Control=c(12, 22, 38, 42, 50),
+                    Tratamiento=c(14, 25, 40, 44, 48))
+
+```
+
+```{r}
+knitr::kable(data_u, align = "c")
+```
+
+```{r}
+wilcox.test(data_u$Control, data_u$Tratamiento, paired = FALSE)
+```
+
+
