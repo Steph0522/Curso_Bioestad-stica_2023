@@ -150,12 +150,11 @@ hist(modelo$residuals)
 shapiro.test(datos$weight)
 shapiro.test(modelo$residuals)
 ```
-
 ]
+
 .pull-right[
-
-```{r, fig.align='center', fig.height=6, eval=TRUE}
-
+```{r, fig.align='center', fig.height=6, eval=TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
 ctrl<- datos %>% filter(group=="ctrl")
 tr1<- datos %>% filter(group=="trt1")
 tr2<- datos %>% filter(group=="trt2")
@@ -168,6 +167,7 @@ shapiro.test(c(ro1,ro2,ro3))
 ```
 
 ]
+
 ---
 ## Otras pruebas
 

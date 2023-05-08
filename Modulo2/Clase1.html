@@ -223,12 +223,12 @@ shapiro.test(modelo$residuals)
 ## data:  modelo$residuals
 ## W = 0.96607, p-value = 0.4379
 ```
-
 ]
+
 .pull-right[
 
-
 ```r
+library(tidyverse)
 ctrl&lt;- datos %&gt;% filter(group=="ctrl")
 tr1&lt;- datos %&gt;% filter(group=="trt1")
 tr2&lt;- datos %&gt;% filter(group=="trt2")
@@ -240,7 +240,16 @@ ro3&lt;- tr1$weight-tr2$weight
 shapiro.test(c(ro1,ro2,ro3))
 ```
 
+```
+## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  c(ro1, ro2, ro3)
+## W = 0.96476, p-value = 0.4072
+```
+
 ]
+
 ---
 ## Otras pruebas
 
