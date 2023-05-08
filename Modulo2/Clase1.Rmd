@@ -154,7 +154,7 @@ shapiro.test(modelo$residuals)
 ]
 .pull-right[
 
-```{r, fig.align='center', fig.height=6, eval=FALSE}
+```{r, fig.align='center', fig.height=6, eval=TRUE}
 
 ctrl<- datos %>% filter(group=="ctrl")
 tr1<- datos %>% filter(group=="trt1")
